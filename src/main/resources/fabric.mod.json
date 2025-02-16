@@ -1,0 +1,6 @@
+{
+    "schemaVersion": 1,
+    "id": "${id}",
+    "version": "${version}",
+    "mixins": [ "databridge.mixins.json" ]
+}

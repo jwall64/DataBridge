@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.jwall64.databridge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinServerFunctionLibrary",
+    "MixinServerResources"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

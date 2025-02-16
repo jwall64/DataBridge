@@ -1,0 +1,5 @@
+{
+  "name": "dbbuilder",
+  "type": "builder",
+  "value": "dev.jwall64.databridge.TestCommand::builder"
+}
