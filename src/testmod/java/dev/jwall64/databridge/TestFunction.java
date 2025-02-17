@@ -24,15 +24,19 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
                                 ResourceLocation id,
                                 CommandDispatcher<CommandSourceStack> dispatcher,
                                 ExecutionContext<CommandSourceStack> ctx,
-                                Frame frame) throws CommandSyntaxException {
+                                Frame frame,
+                                TestState data) throws CommandSyntaxException {
 
-        css.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java method!"));
+        data.value++;
+        css.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java method! (" + data.value + ")"));
     }
 
     private final ResourceLocation id;
+    private final TestState data;
 
-    public TestFunction(ResourceLocation id) {
+    public TestFunction(ResourceLocation id, TestState data) {
         this.id = id;
+        this.data = data;
     }
 
     @Override
@@ -52,7 +56,8 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
             public @NotNull List<UnboundEntryAction<CommandSourceStack>> entries() {
                 return List.of((stack, ctx, frame) -> {
                     try {
-                        stack.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java object!"));
+                        data.value++;
+                        stack.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java object! (" + data.value + ")"));
                     } catch (CommandSyntaxException e) {
                         throw new RuntimeException(e);
                     }

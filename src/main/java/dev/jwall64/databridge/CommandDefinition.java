@@ -1,6 +1,5 @@
 package dev.jwall64.databridge;
 
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandExceptionType;
@@ -10,13 +9,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode) {
+public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Optional<Holder<StateObject<?>>> state) {
 
     private static final CommandExceptionType EXCEPTION = new CommandExceptionType() {};
 
@@ -25,11 +26,11 @@ public record CommandDefinition(String name, Type type, String value, int permis
             Type.CODEC.optionalFieldOf("type", Type.ALIAS).forGetter(CommandDefinition::type),
             Codec.STRING.fieldOf("value").forGetter(CommandDefinition::value),
             Codec.INT.optionalFieldOf("permission_level", 0).forGetter(CommandDefinition::permissionLevel),
-            Codec.STRING.optionalFieldOf("permission_node").forGetter(CommandDefinition::permissionNode)
+            Codec.STRING.optionalFieldOf("permission_node").forGetter(CommandDefinition::permissionNode),
+            RegistryFixedCodec.create(DataBridgeRegistries.STATE_OBJECT).optionalFieldOf("state_object").forGetter(CommandDefinition::state)
     ).apply(instance, CommandDefinition::new));
 
     public LiteralArgumentBuilder<CommandSourceStack> create() {
-
         LiteralArgumentBuilder<CommandSourceStack> out = switch (type) {
             case ALIAS -> Commands.literal(name).executes(ctx -> {
 
@@ -41,13 +42,14 @@ public record CommandDefinition(String name, Type type, String value, int permis
             });
             case METHOD -> {
                 try {
-                    Method method = Utils.findMethod(value, CommandContext.class);
+                    StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
+                    Method method = Utils.findMethod(value, CommandContext.class, obj.type());
                     if(method.getReturnType() != int.class) {
                         throw new IllegalArgumentException("Expected a method which returns an int!");
                     }
                     yield Commands.literal(name).executes(ctx -> {
                         try {
-                            return (int) method.invoke(null, ctx);
+                            return (int) method.invoke(null, ctx, obj.value());
                         } catch (Exception e) {
                             throw new CommandSyntaxException(EXCEPTION, () -> "Unable to execute command " + name + "! " + e.getMessage());
                         }
@@ -73,17 +75,20 @@ public record CommandDefinition(String name, Type type, String value, int permis
     @SuppressWarnings("unchecked")
     private LiteralArgumentBuilder<CommandSourceStack> fromBuilder() {
         try {
-            Method method = Utils.findMethod(value, String.class, LiteralArgumentBuilder.class);
-            if(method.getReturnType() != LiteralArgumentBuilder.class) {
+
+            StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
+
+            Method method = Utils.findMethod(value, String.class, LiteralArgumentBuilder.class, obj.type());
+            if (method.getReturnType() != LiteralArgumentBuilder.class) {
                 throw new IllegalArgumentException("Expected a method which returns a LiteralArgumentBuilder!");
             }
-            return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(null, name, Commands.literal(name));
+            return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(null, name, Commands.literal(name), obj.value());
+
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
-
 
     enum Type {
         ALIAS("alias"),

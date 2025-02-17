@@ -8,15 +8,17 @@ import net.minecraft.network.chat.Component;
 
 public class TestCommand {
 
-    public static int execute(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(() -> Component.literal("Hello from a java method command!"), false);
+    public static int execute(CommandContext<CommandSourceStack> ctx, TestState data) {
+        data.value++;
+        ctx.getSource().sendSuccess(() -> Component.literal("Hello from a java method command! (" + data.value + ")"), false);
         return 1;
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> builder(String id, LiteralArgumentBuilder<CommandSourceStack> builder) {
+    public static LiteralArgumentBuilder<CommandSourceStack> builder(String id, LiteralArgumentBuilder<CommandSourceStack> builder, TestState data) {
         return builder.then(Commands.literal("test")
                 .executes(ctx -> {
-                    ctx.getSource().sendSuccess(() -> Component.literal("Hello from a java builder command!"), false);
+                    data.value++;
+                    ctx.getSource().sendSuccess(() -> Component.literal("Hello from a java builder command! (" + data.value + ")"), false);
                     return 1;
                 })
         );

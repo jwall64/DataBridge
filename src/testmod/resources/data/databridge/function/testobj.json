@@ -1,4 +1,5 @@
 {
     "type": "object",
-    "value": "dev.jwall64.databridge.TestFunction"
+    "value": "dev.jwall64.databridge.TestFunction",
+    "state_object": "databridge:test"
 }

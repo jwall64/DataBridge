@@ -19,10 +19,12 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
 
     private final ResourceLocation id;
     private final Method method;
+    private final Object stateObject;
 
-    public JavaFunction(ResourceLocation id, Method method) {
+    public JavaFunction(ResourceLocation id, Method method, Object stateObject) {
         this.id = id;
         this.method = method;
+        this.stateObject = stateObject;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
         @Override
         public void execute(CommandSourceStack stack, ExecutionContext<CommandSourceStack> ctx, Frame frame) {
             try {
-                method.invoke(null, stack, tag, id, dispatcher, ctx, frame);
+                method.invoke(null, stack, tag, id, dispatcher, ctx, frame, stateObject);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
