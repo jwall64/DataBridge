@@ -52,6 +52,7 @@ public class MixinServerFunctionLibrary {
                 ResourceLocation id = entry.unwrapKey().orElseThrow().location();
                 map.put(id, CompletableFuture.supplyAsync(() -> entry.value().getFunction(id), executor));
             }
+            databridge$javaFunctions = null;
             CompletableFuture<?>[] completableFutures = (CompletableFuture<?>[]) map.values().toArray(CompletableFuture[]::new);
             return CompletableFuture.allOf(completableFutures).handle((void_, th) -> map);
         });

@@ -1,13 +1,10 @@
 package dev.jwall64.databridge.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.asm.mixin.*;
@@ -18,7 +15,6 @@ import dev.jwall64.databridge.DataBridgeRegistries;
 import dev.jwall64.databridge.ServerFunctionLibraryExtension;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
@@ -31,18 +27,10 @@ public abstract class MixinServerResources {
                                         Executor executor, Executor executor2, ReloadableServerRegistries.LoadResult loadResult,
                                         CallbackInfoReturnable<CompletionStage<?>> cir, @Local ReloadableServerResources built) {
 
+        loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry ->
+                built.getCommands().getDispatcher().register(entry.getValue().create()));
+
         ((ServerFunctionLibraryExtension) built.getFunctionLibrary()).addJavaFunctions(loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.FUNCTION));
-    }
-
-    @WrapOperation(method="method_58296", at=@At(value = "INVOKE", target="Lnet/minecraft/server/packs/resources/ReloadInstance;done()Ljava/util/concurrent/CompletableFuture;"))
-    private static CompletableFuture<?> onReload(ReloadInstance instance, Operation<CompletableFuture<?>> original, @Local ReloadableServerResources built, @Local(argsOnly = true) ReloadableServerRegistries.LoadResult loadResult) {
-        CompletableFuture<?> og = original.call(instance);
-        return og.thenApply(obj -> {
-            loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry ->
-                    built.getCommands().getDispatcher().register(entry.getValue().create()));
-
-            return obj;
-        });
     }
 
 }
