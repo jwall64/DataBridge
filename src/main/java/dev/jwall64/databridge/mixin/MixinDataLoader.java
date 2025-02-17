@@ -24,7 +24,7 @@ public class MixinDataLoader {
     public static List<RegistryDataLoader.RegistryData<?>> WORLDGEN_REGISTRIES;
 
     @WrapOperation(method="<clinit>", at=@At(value="FIELD", opcode=Opcodes.PUTSTATIC, target="Lnet/minecraft/resources/RegistryDataLoader;WORLDGEN_REGISTRIES:Ljava/util/List;"))
-    private static void redirectSynchronizedRegistries(List<RegistryDataLoader.RegistryData<?>> value, Operation<Void> original) {
+    private static void redirectWorldgenRegistries(List<RegistryDataLoader.RegistryData<?>> value, Operation<Void> original) {
         original.call(Stream.concat(value.stream(), Stream.of(
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.STATE_OBJECT, StateObject.CODEC, false),
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.COMMAND, CommandDefinition.CODEC, false),
