@@ -12,9 +12,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 public record JavaFunctionDefinition(Type type, String reference, Optional<Holder<StateObject<?>>> stateObject) {
@@ -32,7 +32,7 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
         if(type == Type.METHOD) {
             try {
 
-                Method method = Utils.findMethod(reference,
+                MethodHandle method = Utils.findMethod(reference, void.class,
                         CommandSourceStack.class,
                         CompoundTag.class,
                         ResourceLocation.class,
@@ -43,7 +43,7 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
 
                 return new JavaFunction(id, method, obj.value());
 
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
 

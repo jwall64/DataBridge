@@ -11,17 +11,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 import java.util.List;
 
 public class JavaFunction implements CommandFunction<CommandSourceStack> {
 
+    private static final Logger log = LoggerFactory.getLogger(JavaFunction.class);
     private final ResourceLocation id;
-    private final Method method;
+    private final MethodHandle method;
     private final Object stateObject;
 
-    public JavaFunction(ResourceLocation id, Method method, Object stateObject) {
+    public JavaFunction(ResourceLocation id, MethodHandle method, Object stateObject) {
         this.id = id;
         this.method = method;
         this.stateObject = stateObject;
@@ -62,9 +65,9 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
         @Override
         public void execute(CommandSourceStack stack, ExecutionContext<CommandSourceStack> ctx, Frame frame) {
             try {
-                method.invoke(null, stack, tag, id, dispatcher, ctx, frame, stateObject);
+                method.invoke(stack, tag, id, dispatcher, ctx, frame, stateObject);
             } catch (Throwable e) {
-                throw new RuntimeException(e);
+                log.error("An error occurred while executing a java method function!", e);
             }
         }
 

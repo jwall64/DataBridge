@@ -13,8 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 import java.util.Optional;
 
 public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Optional<Holder<StateObject<?>>> state) {
@@ -43,18 +42,15 @@ public record CommandDefinition(String name, Type type, String value, int permis
             case METHOD -> {
                 try {
                     StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
-                    Method method = Utils.findMethod(value, CommandContext.class, obj.type());
-                    if(method.getReturnType() != int.class) {
-                        throw new IllegalArgumentException("Expected a method which returns an int!");
-                    }
+                    MethodHandle method = Utils.findMethod(value, int.class, CommandContext.class, obj.type());
                     yield Commands.literal(name).executes(ctx -> {
                         try {
-                            return (int) method.invoke(null, ctx, obj.value());
-                        } catch (Exception e) {
+                            return (int) method.invoke(ctx, obj.value());
+                        } catch (Throwable e) {
                             throw new CommandSyntaxException(EXCEPTION, () -> "Unable to execute command " + name + "! " + e.getMessage());
                         }
                     });
-                } catch (ClassNotFoundException | NoSuchMethodException ex) {
+                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -78,15 +74,14 @@ public record CommandDefinition(String name, Type type, String value, int permis
 
             StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
 
-            Method method = Utils.findMethod(value, String.class, LiteralArgumentBuilder.class, obj.type());
-            if (method.getReturnType() != LiteralArgumentBuilder.class) {
-                throw new IllegalArgumentException("Expected a method which returns a LiteralArgumentBuilder!");
+            MethodHandle method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class, LiteralArgumentBuilder.class, obj.type());
+            try {
+                return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(name, Commands.literal(name), obj.value());
+            } catch (Throwable th) {
+                throw new RuntimeException("An exception occurred while loading a command!", th);
             }
-            return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(null, name, Commands.literal(name), obj.value());
-
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                 IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException("Unable to access method handle for " + value + "!", e);
         }
     }
 
