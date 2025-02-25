@@ -1,9 +1,12 @@
 package dev.jwall64.databridge;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.FunctionInstantiationException;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.execution.Frame;
 import net.minecraft.commands.execution.UnboundEntryAction;
@@ -12,6 +15,8 @@ import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -44,6 +49,27 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
                                 TestState data) throws CommandSyntaxException {
 
         log.info("minecraft:load tag executed");
+    }
+
+    public static void funcInteract(CommandSourceStack css,
+                                    CompoundTag tag,
+                                    ResourceLocation id,
+                                    CommandDispatcher<CommandSourceStack> dispatcher,
+                                    ExecutionContext<CommandSourceStack> ctx,
+                                    Frame frame,
+                                    TestState data) throws CommandSyntaxException {
+
+        EntitySelector selector = new EntitySelectorParser(new StringReader("@t"), true).parse();
+        Entity entity = selector.findSingleEntity(css);
+
+        ServerPlayer player = css.getPlayerOrException();
+
+        data.value++;
+        player.sendSystemMessage(player.getName()
+                .copy()
+                .append(Component.literal(" interacted with "))
+                .append(entity.getName())
+                .append(" (" + data.value + ")"));
     }
 
     private final ResourceLocation id;

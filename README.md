@@ -88,3 +88,40 @@ folder with the following format:
 ```
 This should be an object with a public, default constructor. It will be created when data packs are loaded for the first time.
 This is the object which will be passed to functions and commands, if specified.
+
+
+### Interaction Entities
+Interaction entities can now directly execute functions, rather than just storing the last player who interacted with them.
+To facilitate this, the mod adds two new NBT fields for interaction entities:
+```nbtt
+{
+    functions: {
+        "namespace:function_name": {param: "value"}
+    },
+    attack_functions: {
+        "namespace:function_name": {param: "value"}
+    }
+}
+```
+The functions specified in the `functions` field will be called each time a player right-clicks the entity, as the player
+who interacted.
+
+The functions specified in the `attack_functions` field will be called each time a player left-clicks the entity, as the player
+who attacked.
+
+### Trigger Selector
+
+The mod also adds a new entity selector type: `@t` This will target the entity which triggered the function. Meaning, 
+for example, functions called from interaction entities will have `@s` target to the player who interacted, and `@t` 
+target to the interaction entity itself.
+
+The trigger entity can be accessed from Java directly by compiling against this mod, and accessing its internal classes. 
+However, the internal structure of this mod is subject to change, so it is not recommended to compile against it for the 
+time being. 
+
+An alternative way of accessing the trigger entity from Java would be as follows:
+
+```java
+EntitySelector triggerSelector = new EntitySelectorParser(new StringReader("@t"), true).parse(); // Cache this 
+Entity trigger = triggerSelector.findSingleEntity(cs);
+```
