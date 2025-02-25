@@ -1,0 +1,1 @@
+tellraw @s {"selector":"@s","extra":[{"text":" interacted with "},{"selector":"@t"}]}
