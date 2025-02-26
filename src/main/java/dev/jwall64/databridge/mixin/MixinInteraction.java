@@ -37,11 +37,12 @@ import java.util.List;
 public class MixinInteraction {
 
     @Shadow @Final private static Logger LOGGER;
-    @Unique
-    private List<Pair<ResourceLocation, CompoundTag>> databridge$functions = Collections.emptyList();
 
     @Unique
-    private List<Pair<ResourceLocation, CompoundTag>> databridge$attackFunctions = Collections.emptyList();
+    private List<Pair<ResourceLocation, CompoundTag>> databridge$functions;
+
+    @Unique
+    private List<Pair<ResourceLocation, CompoundTag>> databridge$attackFunctions;
 
     @Unique
     private CommandSource databridge$commandSource;
@@ -65,7 +66,7 @@ public class MixinInteraction {
     @Unique
     private void executeFunctions(List<Pair<ResourceLocation, CompoundTag>> functions, ServerPlayer player) {
 
-        if(functions.isEmpty()) return;
+        if(functions == null || functions.isEmpty()) return;
 
         Interaction self = (Interaction) (Object) this;
         MinecraftServer server = self.getServer();
@@ -101,7 +102,6 @@ public class MixinInteraction {
         databridge$commandSource = new CommandSource() {
             @Override
             public void sendSystemMessage(Component component) { }
-
             @Override
             public boolean acceptsSuccess() {
                 return false;
@@ -119,24 +119,28 @@ public class MixinInteraction {
 
     @Inject(method="readAdditionalSaveData", at=@At("RETURN"))
     private void onLoad(CompoundTag tag, CallbackInfo ci) {
-        if(tag.contains("functions", CompoundTag.TAG_COMPOUND)) {
+        if(tag.contains("functions", Tag.TAG_COMPOUND)) {
             databridge$functions = databridge$readFunctions(tag.getCompound("functions"));
+        } else {
+            databridge$functions = Collections.emptyList();
         }
         if(tag.contains("attack_functions", Tag.TAG_COMPOUND)) {
             databridge$attackFunctions = databridge$readFunctions(tag.getCompound("attack_functions"));
+        } else {
+            databridge$attackFunctions = Collections.emptyList();
         }
     }
 
     @Inject(method="addAdditionalSaveData", at=@At("RETURN"))
     private void onSave(CompoundTag tag, CallbackInfo ci) {
-        if (!databridge$functions.isEmpty()) {
+        if (databridge$functions != null && !databridge$functions.isEmpty()) {
             CompoundTag functions = new CompoundTag();
             for (Pair<ResourceLocation, CompoundTag> fn : databridge$functions) {
                 functions.put(fn.getFirst().toString(), fn.getSecond());
             }
             tag.put("functions", functions);
         }
-        if (!databridge$attackFunctions.isEmpty()) {
+        if (databridge$attackFunctions != null && !databridge$attackFunctions.isEmpty()) {
             CompoundTag functions = new CompoundTag();
             for (Pair<ResourceLocation, CompoundTag> fn : databridge$attackFunctions) {
                 functions.put(fn.getFirst().toString(), fn.getSecond());
