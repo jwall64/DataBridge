@@ -1,6 +1,9 @@
 package dev.jwall64.databridge.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.server.ReloadableServerRegistries;
@@ -27,8 +30,14 @@ public abstract class MixinServerResources {
                                         Executor executor, Executor executor2, ReloadableServerRegistries.LoadResult loadResult,
                                         CallbackInfoReturnable<CompletionStage<?>> cir, @Local ReloadableServerResources built) {
 
-        loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry ->
-                built.getCommands().getDispatcher().register(entry.getValue().create()));
+        CommandBuildContext ctx = CommandBuildContext.simple(loadResult.lookupWithUpdatedTags(), featureFlagSet);
+        loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry -> {
+
+            LiteralArgumentBuilder<CommandSourceStack> builder = entry.getValue().create(ctx, commandSelection);
+            if(builder != null) {
+                built.getCommands().getDispatcher().register(builder);
+            }
+        });
 
         ((ServerFunctionLibraryExtension) built.getFunctionLibrary()).addJavaFunctions(loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.FUNCTION));
     }

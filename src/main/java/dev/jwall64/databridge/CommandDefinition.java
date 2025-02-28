@@ -7,18 +7,31 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.util.Optional;
 
-public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Optional<Holder<StateObject<?>>> state) {
+public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Commands.CommandSelection environment, Optional<Holder<StateObject<?>>> state) {
 
     private static final CommandExceptionType EXCEPTION = new CommandExceptionType() {};
+
+    private static final Codec<Commands.CommandSelection> COMMAND_SELECTION_CODEC = Codec.STRING.xmap(str -> switch (str) {
+            case "all" -> Commands.CommandSelection.ALL;
+            case "dedicated" -> Commands.CommandSelection.DEDICATED;
+            case "integrated" -> Commands.CommandSelection.INTEGRATED;
+            default -> throw new IllegalStateException("Unexpected value: " + str);
+    }, sel -> switch (sel) {
+        case ALL -> "all";
+        case DEDICATED -> "dedicated";
+        case INTEGRATED -> "integrated";
+    });
 
     public static final Codec<CommandDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(CommandDefinition::name),
@@ -26,10 +39,22 @@ public record CommandDefinition(String name, Type type, String value, int permis
             Codec.STRING.fieldOf("value").forGetter(CommandDefinition::value),
             Codec.INT.optionalFieldOf("permission_level", 0).forGetter(CommandDefinition::permissionLevel),
             Codec.STRING.optionalFieldOf("permission_node").forGetter(CommandDefinition::permissionNode),
+            COMMAND_SELECTION_CODEC.optionalFieldOf("environment", Commands.CommandSelection.ALL).forGetter(CommandDefinition::environment),
             RegistryFixedCodec.create(DataBridgeRegistries.STATE_OBJECT).optionalFieldOf("state_object").forGetter(CommandDefinition::state)
     ).apply(instance, CommandDefinition::new));
 
-    public LiteralArgumentBuilder<CommandSourceStack> create() {
+    private boolean inSelection(Commands.CommandSelection commandSelection) {
+        if(environment == Commands.CommandSelection.ALL || commandSelection == Commands.CommandSelection.ALL) return true;
+        return environment == commandSelection;
+    }
+
+    @Nullable
+    public LiteralArgumentBuilder<CommandSourceStack> create(CommandBuildContext buildCtx, Commands.CommandSelection commandSelection) {
+
+        if(!inSelection(commandSelection)) {
+            return null;
+        }
+
         LiteralArgumentBuilder<CommandSourceStack> out = switch (type) {
             case ALIAS -> Commands.literal(name).executes(ctx -> {
 
@@ -54,7 +79,7 @@ public record CommandDefinition(String name, Type type, String value, int permis
                     throw new RuntimeException(ex);
                 }
             }
-            case BUILDER -> fromBuilder();
+            case BUILDER -> fromBuilder(buildCtx);
         };
 
         if(permissionLevel > 0) {
@@ -69,14 +94,13 @@ public record CommandDefinition(String name, Type type, String value, int permis
     }
 
     @SuppressWarnings("unchecked")
-    private LiteralArgumentBuilder<CommandSourceStack> fromBuilder() {
+    private LiteralArgumentBuilder<CommandSourceStack> fromBuilder(CommandBuildContext buildContext) {
         try {
 
             StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
-
-            MethodHandle method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class, LiteralArgumentBuilder.class, obj.type());
+            MethodHandle method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class, LiteralArgumentBuilder.class, CommandBuildContext.class, obj.type());
             try {
-                return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(name, Commands.literal(name), obj.value());
+                return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(name, Commands.literal(name), buildContext, obj.value());
             } catch (Throwable th) {
                 throw new RuntimeException("An exception occurred while loading a command!", th);
             }

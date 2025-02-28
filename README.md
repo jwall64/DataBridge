@@ -69,13 +69,19 @@ For example:
 If the type is `method`, `value` should be a method reference in the
 form `<fully.qualified.class.Name>::<method>`. The method with that name should have the following signature:
 ```java
-public static int method(CommandContext<CommandSourceStack> context, <State object type> state) { }
+public static int method(
+        CommandContext<CommandSourceStack> context, 
+        <State object type> state) { }
 ```
 
 If the type is `builder`, `value` should be a method reference in the
 form `<fully.qualified.class.Name>::<method>`. The method with that name should have the following signature:
 ```java
-public static LiteralArgumentBuilder<CommandSourceStack> method(String id, LiteralArgumentBuilder<CommandSourceStack> builder, <State object type> state) { }
+public static LiteralArgumentBuilder<CommandSourceStack> method(
+        String id, 
+        LiteralArgumentBuilder<CommandSourceStack> builder, 
+        CommandBuildContext ctx,
+        <State object type> state) { }
 ```
 
 ### State Objects
