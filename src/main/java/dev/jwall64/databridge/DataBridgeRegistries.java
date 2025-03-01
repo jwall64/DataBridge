@@ -6,8 +6,10 @@ import net.minecraft.resources.ResourceLocation;
 
 public class DataBridgeRegistries {
 
-    public static final ResourceKey<Registry<StateObject<?>>> STATE_OBJECT = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("state_object"));
-    public static final ResourceKey<Registry<CommandDefinition>> COMMAND = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("command"));
-    public static final ResourceKey<Registry<JavaFunctionDefinition>> FUNCTION = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("function"));
+    public static final String NAMESPACE = "databridge";
+
+    public static final ResourceKey<Registry<StateObject<?>>> STATE_OBJECT = ResourceKey.createRegistryKey(ResourceLocation.tryBuild(NAMESPACE, "state_object"));
+    public static final ResourceKey<Registry<CommandDefinition>> COMMAND = ResourceKey.createRegistryKey(ResourceLocation.tryBuild(NAMESPACE, "command"));
+    public static final ResourceKey<Registry<JavaFunctionDefinition>> FUNCTION = ResourceKey.createRegistryKey(ResourceLocation.tryBuild(NAMESPACE, "function"));
 
 }

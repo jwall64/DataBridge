@@ -1,3 +1,4 @@
 {
-  "class": "dev.jwall64.databridge.TestState"
+  "type": "dev.jwall64.databridge.TestState",
+  "factory": "dev.jwall64.databridge.TestState::create"
 }

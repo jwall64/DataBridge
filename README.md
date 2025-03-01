@@ -24,14 +24,14 @@ public static void method(CommandSourceStack css,
             CommandDispatcher<CommandSourceStack> dispatcher,
             ExecutionContext<CommandSourceStack> ctx,
             Frame frame,
-            <State object type> state) { }
+            S state) { }
 ```
 If no state object is specified, The state object type is Void.
 
 If the type is `object`, `value` should be the fully qualified class name of a class which implements
 `CommandFunction<CommandSourceStack>`. The class should have a public constructor with the following signature:
 ```java
-MyFunction(ResourceLocation id, <State object type> state);
+MyFunction(ResourceLocation id, S state);
 ```
 
 ### Command Definitions
@@ -71,7 +71,7 @@ form `<fully.qualified.class.Name>::<method>`. The method with that name should 
 ```java
 public static int method(
         CommandContext<CommandSourceStack> context, 
-        <State object type> state) { }
+        S state) { }
 ```
 
 If the type is `builder`, `value` should be a method reference in the
@@ -81,7 +81,7 @@ public static LiteralArgumentBuilder<CommandSourceStack> method(
         String id, 
         LiteralArgumentBuilder<CommandSourceStack> builder, 
         CommandBuildContext ctx,
-        <State object type> state) { }
+        S state) { }
 ```
 
 ### State Objects
@@ -89,11 +89,19 @@ For sharing state between functions/commands, data packs can define state object
 folder with the following format:
 ```json
 {
-  "class": "fully.qualified.class.Name"
+  "type": "<fully.qualified.class.Name>",
+  "factory": "<fully.qualified.class.Name>::<method>"
 }
 ```
-This should be an object with a public, default constructor. It will be created when data packs are loaded for the first time.
-This is the object which will be passed to functions and commands, if specified.
+`factory` should be a reference to a public method with the following signature:
+```java
+public static S method(ReloadableServerResources resources, 
+                       ReloadableServerResources.LoadResult loadResult, 
+                       ResourceManager resourceManager,
+                       @Nullable S prevInstance);
+```
+Whenever data packs are reloaded, this method will be called, The value it returns should be an instance of `type` and is 
+the object which will be passed to functions and commands, if specified.
 
 
 ### Interaction Entities
@@ -116,7 +124,6 @@ The functions specified in the `attack_functions` field will be called each time
 who attacked.
 
 ### Trigger Selector
-
 The mod also adds a new entity selector type: `@t` This will target the entity which triggered the function. Meaning, 
 for example, functions called from interaction entities will have `@s` target to the player who interacted, and `@t` 
 target to the interaction entity itself.

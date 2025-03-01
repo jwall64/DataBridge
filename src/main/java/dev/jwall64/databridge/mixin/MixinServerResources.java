@@ -6,6 +6,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.jwall64.databridge.DataBridgeRegistries;
 import dev.jwall64.databridge.ServerFunctionLibraryExtension;
+import dev.jwall64.databridge.StateObject;
 
 import java.util.List;
 import java.util.concurrent.CompletionStage;
@@ -30,8 +32,14 @@ public abstract class MixinServerResources {
                                         Executor executor, Executor executor2, ReloadableServerRegistries.LoadResult loadResult,
                                         CallbackInfoReturnable<CompletionStage<?>> cir, @Local ReloadableServerResources built) {
 
+        RegistryAccess.Frozen access = loadResult.layers().compositeAccess();
+
+        for(StateObject<?> obj : access.lookupOrThrow(DataBridgeRegistries.STATE_OBJECT)) {
+            obj.reload(built, loadResult, resourceManager);
+        }
+
         CommandBuildContext ctx = CommandBuildContext.simple(loadResult.lookupWithUpdatedTags(), featureFlagSet);
-        loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry -> {
+        access.lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry -> {
 
             LiteralArgumentBuilder<CommandSourceStack> builder = entry.getValue().create(ctx, commandSelection);
             if(builder != null) {
@@ -39,7 +47,7 @@ public abstract class MixinServerResources {
             }
         });
 
-        ((ServerFunctionLibraryExtension) built.getFunctionLibrary()).addJavaFunctions(loadResult.layers().compositeAccess().lookupOrThrow(DataBridgeRegistries.FUNCTION));
+        ((ServerFunctionLibraryExtension) built.getFunctionLibrary()).addJavaFunctions(access.lookupOrThrow(DataBridgeRegistries.FUNCTION));
     }
 
 }
