@@ -19,9 +19,8 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Final;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,13 +29,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.jwall64.databridge.CommandSourceStackExtension;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Mixin(Interaction.class)
 public class MixinInteraction {
 
-    @Shadow @Final private static Logger LOGGER;
+    @Unique
+    private static final Logger databridge$LOGGER = LoggerFactory.getLogger("databridge");
 
     @Unique
     private List<Pair<ResourceLocation, CompoundTag>> databridge$functions;
@@ -50,7 +49,7 @@ public class MixinInteraction {
     @Unique
     private List<Pair<ResourceLocation, CompoundTag>> databridge$readFunctions(CompoundTag tag) {
         List<Pair<ResourceLocation, CompoundTag>> readFunctions = new ArrayList<>();
-        for(String key : tag.getAllKeys()) {
+        for(String key : tag.keySet()) {
 
             CompoundTag args = new CompoundTag();
             Tag t = tag.get(key);
@@ -89,7 +88,7 @@ public class MixinInteraction {
                     Commands.executeCommandInContext(cs, (executionContext) -> ExecutionContext.queueInitialFunctionCall(executionContext, instantiatedFunction, cs, CommandResultCallback.EMPTY));
                 } catch (FunctionInstantiationException ignored) {
                 } catch (Exception exception) {
-                    LOGGER.warn("Failed to execute function {}", cf.id(), exception);
+                    databridge$LOGGER.warn("Failed to execute function {}", cf.id(), exception);
                 }
             });
         }
@@ -119,16 +118,8 @@ public class MixinInteraction {
 
     @Inject(method="readAdditionalSaveData", at=@At("RETURN"))
     private void onLoad(CompoundTag tag, CallbackInfo ci) {
-        if(tag.contains("functions", Tag.TAG_COMPOUND)) {
-            databridge$functions = databridge$readFunctions(tag.getCompound("functions"));
-        } else {
-            databridge$functions = Collections.emptyList();
-        }
-        if(tag.contains("attack_functions", Tag.TAG_COMPOUND)) {
-            databridge$attackFunctions = databridge$readFunctions(tag.getCompound("attack_functions"));
-        } else {
-            databridge$attackFunctions = Collections.emptyList();
-        }
+        databridge$functions = databridge$readFunctions(tag.getCompoundOrEmpty("functions"));
+        databridge$attackFunctions = databridge$readFunctions(tag.getCompoundOrEmpty("attack_functions"));
     }
 
     @Inject(method="addAdditionalSaveData", at=@At("RETURN"))

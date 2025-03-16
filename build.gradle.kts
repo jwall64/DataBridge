@@ -16,9 +16,9 @@ sourceSets {
 
 dependencies {
 
-    minecraft("com.mojang:minecraft:1.21.4")
+    minecraft("com.mojang:minecraft:${project.properties["minecraft-version"]}")
     mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:0.16.10")
+    modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric-loader-version"]}")
 
     // Fabric API
     val apiModules = listOf(
@@ -26,7 +26,7 @@ dependencies {
         "fabric-resource-loader-v0"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.116.1+1.21.4"))!!)
+        modApi(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
     }
 
     include(modApi("me.lucko:fabric-permissions-api:0.3.3") {
