@@ -1,0 +1,6 @@
+{
+  "type": "block_based",
+  "max_ticks": 4,
+  "structure": "databridge:test_cmd_method",
+  "environment": "databridge:main"
+}

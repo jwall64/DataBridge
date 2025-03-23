@@ -29,9 +29,12 @@ dependencies {
         modApi(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
     }
 
+
     include(modApi("me.lucko:fabric-permissions-api:0.3.3") {
         isTransitive = false
     })
+
+    "testmodImplementation"(sourceSets.main.get().output)
 }
 
 loom {
@@ -43,7 +46,6 @@ loom {
     runs {
         register("testmodServer") {
             server()
-            ideConfigGenerated(false)
             runDir = "run/testserver"
             name = "Testmod Server"
             source(sourceSets.getByName("testmod"))

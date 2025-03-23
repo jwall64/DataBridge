@@ -37,7 +37,8 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
                                 TestState data) throws CommandSyntaxException {
 
         data.value++;
-        css.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java method! (" + data.value + ")"));
+        css.sendSuccess(() -> Component.literal("Hello from a java method! (" + data.value + ")"), true);
+        frame.returnSuccess(data.value);
     }
 
     public static void funcTestLoad(CommandSourceStack css,
@@ -49,6 +50,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
                                 TestState data) throws CommandSyntaxException {
 
         log.info("minecraft:load tag executed");
+        frame.returnSuccess(data.value);
     }
 
     public static void funcInteract(CommandSourceStack css,
@@ -70,6 +72,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
                 .append(Component.literal(" interacted with "))
                 .append(entity.getName())
                 .append(" (" + data.value + ")"));
+        frame.returnSuccess(data.value);
     }
 
     private final ResourceLocation id;
@@ -96,12 +99,9 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
             @Override
             public @NotNull List<UnboundEntryAction<CommandSourceStack>> entries() {
                 return List.of((stack, ctx, frame) -> {
-                    try {
-                        data.value++;
-                        stack.getPlayerOrException().sendSystemMessage(Component.literal("Hello from a java object! (" + data.value + ")"));
-                    } catch (CommandSyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
+                    data.value++;
+                    stack.sendSuccess(() -> (Component.literal("Hello from a java object! (" + data.value + ")")), false);
+                    frame.returnSuccess(data.value);
                 });
             }
         };
