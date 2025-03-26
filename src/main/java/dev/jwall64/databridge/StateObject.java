@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Optional;
 
 public class StateObject<T> {
 
@@ -30,15 +31,15 @@ public class StateObject<T> {
         this.destructor = destructor;
     }
 
-    private static <T> StateObject<T> lookup(Class<T> type, String factoryRef, String destructorRef) {
+    private static <T> StateObject<T> lookup(Class<T> type, String factoryRef, Optional<String> destructorRef) {
         try {
 
             MethodHandle destructor = null;
-            if (destructorRef != null) {
-                destructor = Utils.findMethod(destructorRef, destructorType(type));
+            if (destructorRef.isPresent()) {
+                destructor = Utils.findMethod(destructorRef.get(), destructorType(type));
             }
 
-            return new StateObject<>(type, factoryRef, Utils.findMethod(factoryRef, type(type)), destructorRef, destructor);
+            return new StateObject<>(type, factoryRef, Utils.findMethod(factoryRef, type(type)), destructorRef.orElse(null), destructor);
         } catch (ReflectiveOperationException ex) {
             throw new RuntimeException(ex);
         }
@@ -49,7 +50,7 @@ public class StateObject<T> {
     }
 
     private static <T> MethodType destructorType(Class<T> type) {
-        return MethodType.methodType(Void.class, type);
+        return MethodType.methodType(Void.TYPE, type);
     }
 
     public static final StateObject<Void> EMPTY = new StateObject<>(Void.class, "", MethodHandles.empty(type(Void.class)), null, null);
@@ -62,8 +63,8 @@ public class StateObject<T> {
         return factoryRef;
     }
 
-    public String destructorRef() {
-        return destructorRef;
+    public Optional<String> destructorRef() {
+        return Optional.ofNullable(destructorRef);
     }
 
     public MethodHandle factory() {
@@ -79,8 +80,8 @@ public class StateObject<T> {
         if(this == EMPTY) return;
         try {
             T oldValue = value;
-            value = type.cast(factory.invoke(resources, loadResult, resourceManager, value));
-            if(destructor != null) {
+            value = type.cast(factory.invoke(resources, loadResult, resourceManager, oldValue));
+            if(destructor != null && oldValue != null) {
                 destructor.invoke(oldValue);
             }
         } catch (Throwable th) {
@@ -109,7 +110,7 @@ public class StateObject<T> {
     public static final Codec<StateObject<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CLASS_CODEC.fieldOf("type").forGetter(StateObject::type),
             Codec.STRING.fieldOf("factory").forGetter(StateObject::factoryRef),
-            Codec.STRING.optionalFieldOf("destructor", null).forGetter(StateObject::destructorRef)
+            Codec.STRING.optionalFieldOf("destructor").forGetter(StateObject::destructorRef)
     ).apply(instance, StateObject::lookup));
 
 }
