@@ -90,7 +90,8 @@ folder with the following format:
 ```json
 {
   "type": "<fully.qualified.class.Name>",
-  "factory": "<fully.qualified.class.Name>::<method>"
+  "factory": "<fully.qualified.class.Name>::<method>",
+  "destructor": "<fully.qualified.class.Name>::<method>"
 }
 ```
 `factory` should be a reference to a public method with the following signature:
@@ -102,6 +103,14 @@ public static S method(ReloadableServerResources resources,
 ```
 Whenever data packs are reloaded, this method will be called, The value it returns should be an instance of `type` and is 
 the object which will be passed to functions and commands, if specified.
+
+The `destructor` field is optional. If specified, it should have the following signature:
+```java
+public static void method(S prevInstance);
+```
+This method will be called after reloads and before server shutdown. The parameter is always the same as the `prevInstance`
+parameter in the factory method. That is: the value returned the last time the factory method was called. On reload, 
+destructors are called after factories (if there is a previous instance available.)
 
 
 ### Interaction Entities
