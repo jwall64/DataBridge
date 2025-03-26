@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "databridge:load"
+    "databridge:load",
+    "databridge:load_mc"
   ]
 }

@@ -2,7 +2,9 @@ package dev.jwall64.databridge.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,5 +33,13 @@ public class MixinDataLoader {
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.FUNCTION, JavaFunctionDefinition.CODEC, false)
         )).toList());
     }
+
+    @WrapOperation(method="loadContentsFromManager", at=@At(value="INVOKE", target="Lnet/minecraft/tags/TagLoader;loadTagsForRegistry(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/WritableRegistry;)V"))
+    private static <T> void onLoadTags(ResourceManager resourceManager, WritableRegistry<T> writableRegistry, Operation<Void> original) {
+        if(!(writableRegistry.key().equals(DataBridgeRegistries.FUNCTION))) {
+            original.call(resourceManager, writableRegistry);
+        }
+    }
+
 
 }

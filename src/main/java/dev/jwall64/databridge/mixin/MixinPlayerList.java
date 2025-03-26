@@ -23,8 +23,16 @@ public class MixinPlayerList {
         ServerFunctionUtil.executeFunctionTag(serverPlayer.server, DatabridgeFunctionTags.JOIN, data, source -> source.withEntity(serverPlayer));
     }
 
+    @Inject(method="placeNewPlayer", at=@At(value="TAIL"))
+    private void postJoin(Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
+        CompoundTag data = new CompoundTag();
+        data.putString("username", serverPlayer.getGameProfile().getName());
+        data.putString("uuid", serverPlayer.getUUID().toString());
+        ServerFunctionUtil.executeFunctionTag(serverPlayer.server, DatabridgeFunctionTags.JOINED, data, source -> source.withEntity(serverPlayer));
+    }
+
     @Inject(method="remove", at=@At(value="HEAD"))
-    private void onJoin(ServerPlayer serverPlayer, CallbackInfo ci) {
+    private void onLeave(ServerPlayer serverPlayer, CallbackInfo ci) {
         CompoundTag data = new CompoundTag();
         data.putString("username", serverPlayer.getGameProfile().getName());
         data.putString("uuid", serverPlayer.getUUID().toString());
