@@ -1,4 +1,4 @@
-package dev.jwall64.databridge;
+package dev.jwall64.databridge.impl;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
@@ -11,12 +11,14 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public record JavaFunctionDefinition(Type type, String reference, Optional<Holder<StateObject<?>>> stateObject) {
 
     public static final Codec<JavaFunctionDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(

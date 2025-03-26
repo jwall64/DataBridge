@@ -11,13 +11,13 @@ import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import dev.jwall64.databridge.DataBridgeRegistries;
-import dev.jwall64.databridge.ServerFunctionLibraryExtension;
-import dev.jwall64.databridge.StateObject;
+import dev.jwall64.databridge.impl.DataBridgeRegistries;
+import dev.jwall64.databridge.impl.ServerFunctionLibraryExtension;
+import dev.jwall64.databridge.impl.StateObject;
 
 import java.util.List;
 import java.util.concurrent.CompletionStage;

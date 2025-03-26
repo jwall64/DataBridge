@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import dev.jwall64.databridge.CommandSourceStackExtension;
-import dev.jwall64.databridge.EntitySelectorExtension;
+import dev.jwall64.databridge.impl.CommandSourceStackExtension;
+import dev.jwall64.databridge.impl.EntitySelectorExtension;
 
 import java.util.List;
 

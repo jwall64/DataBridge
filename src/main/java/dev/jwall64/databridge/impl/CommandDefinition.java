@@ -1,4 +1,4 @@
-package dev.jwall64.databridge;
+package dev.jwall64.databridge.impl;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,11 +13,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Commands.CommandSelection environment, Optional<Holder<StateObject<?>>> state) {
 
     private static final CommandExceptionType EXCEPTION = new CommandExceptionType() {};

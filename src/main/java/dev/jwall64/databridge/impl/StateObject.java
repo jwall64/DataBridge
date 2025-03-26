@@ -1,11 +1,13 @@
-package dev.jwall64.databridge;
+package dev.jwall64.databridge.impl;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
@@ -13,6 +15,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public class StateObject<T> {
 
     private final Class<T> type;
@@ -87,6 +90,19 @@ public class StateObject<T> {
         } catch (Throwable th) {
             throw new RuntimeException(th);
         }
+    }
+
+    public boolean isPresent() {
+        return value != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<StateObject<T>> get(MinecraftServer server, Class<T> type, ResourceLocation location) {
+
+        return server.registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT)
+                .map(reg -> reg.getValue(location))
+                .filter(obj -> type.isAssignableFrom(obj.type))
+                .map(obj -> (StateObject<T>) obj);
     }
 
     public void unload() {

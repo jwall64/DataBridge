@@ -1,4 +1,4 @@
-package dev.jwall64.databridge;
+package dev.jwall64.databridge.impl;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -9,6 +9,7 @@ import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandle;
 import java.util.List;
 
+@ApiStatus.Internal
 public class JavaFunction implements CommandFunction<CommandSourceStack> {
 
     private static final Logger log = LoggerFactory.getLogger(JavaFunction.class);

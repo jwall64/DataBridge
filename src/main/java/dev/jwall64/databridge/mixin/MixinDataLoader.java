@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import dev.jwall64.databridge.CommandDefinition;
-import dev.jwall64.databridge.DataBridgeRegistries;
-import dev.jwall64.databridge.JavaFunctionDefinition;
-import dev.jwall64.databridge.StateObject;
+import dev.jwall64.databridge.impl.CommandDefinition;
+import dev.jwall64.databridge.impl.DataBridgeRegistries;
+import dev.jwall64.databridge.impl.JavaFunctionDefinition;
+import dev.jwall64.databridge.impl.StateObject;
 
 import java.util.List;
 import java.util.stream.Stream;

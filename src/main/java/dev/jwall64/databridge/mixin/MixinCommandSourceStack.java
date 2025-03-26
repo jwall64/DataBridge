@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import dev.jwall64.databridge.CommandSourceStackExtension;
+import dev.jwall64.databridge.impl.CommandSourceStackExtension;
 
 
 @Mixin(CommandSourceStack.class)

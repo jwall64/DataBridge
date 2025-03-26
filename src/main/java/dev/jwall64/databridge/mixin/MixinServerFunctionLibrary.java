@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import dev.jwall64.databridge.JavaFunctionDefinition;
-import dev.jwall64.databridge.ServerFunctionLibraryExtension;
+import dev.jwall64.databridge.impl.JavaFunctionDefinition;
+import dev.jwall64.databridge.impl.ServerFunctionLibraryExtension;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
