@@ -9,6 +9,7 @@
     "MixinEntitySelector",
     "MixinEntitySelectorParser",
     "MixinInteraction",
+    "MixinMinecraftServer",
     "MixinServerFunctionLibrary",
     "MixinServerResources"
   ],
