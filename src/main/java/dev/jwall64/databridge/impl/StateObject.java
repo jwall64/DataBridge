@@ -14,9 +14,10 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class StateObject<T> {
+public class StateObject<T> implements Supplier<T> {
 
     private final Class<T> type;
     private final String factoryRef;
@@ -129,4 +130,9 @@ public class StateObject<T> {
             Codec.STRING.optionalFieldOf("destructor").forGetter(StateObject::destructorRef)
     ).apply(instance, StateObject::lookup));
 
+    @Override
+    @Nullable
+    public T get() {
+        return value;
+    }
 }

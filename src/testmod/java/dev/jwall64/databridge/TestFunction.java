@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class TestFunction implements CommandFunction<CommandSourceStack> {
 
@@ -76,12 +77,17 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
     }
 
     private final ResourceLocation id;
-    private final TestState data;
+    private final Supplier<TestState> data;
 
-    public TestFunction(ResourceLocation id, TestState data) {
+    public TestFunction(ResourceLocation id, Supplier<TestState> data) {
         this.id = id;
         this.data = data;
     }
+
+    public static CommandFunction<CommandSourceStack> create(ResourceLocation id, Supplier<TestState> data) {
+        return new TestFunction(id, data);
+    }
+
 
     @Override
     public @NotNull ResourceLocation id() {
@@ -99,9 +105,10 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
             @Override
             public @NotNull List<UnboundEntryAction<CommandSourceStack>> entries() {
                 return List.of((stack, ctx, frame) -> {
-                    data.value++;
-                    stack.sendSuccess(() -> (Component.literal("Hello from a java object! (" + data.value + ")")), false);
-                    frame.returnSuccess(data.value);
+                    TestState state = data.get();
+                    state.value++;
+                    stack.sendSuccess(() -> (Component.literal("Hello from a java object! (" + state.value + ")")), false);
+                    frame.returnSuccess(state.value);
                 });
             }
         };

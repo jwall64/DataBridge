@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public record CommandDefinition(String name, Type type, String value, int permissionLevel, Optional<String> permissionNode, Commands.CommandSelection environment, Optional<Holder<StateObject<?>>> state) {
@@ -100,9 +101,9 @@ public record CommandDefinition(String name, Type type, String value, int permis
         try {
 
             StateObject<?> obj = state.isPresent() ? state.get().value() : StateObject.EMPTY;
-            MethodHandle method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class, LiteralArgumentBuilder.class, CommandBuildContext.class, obj.type());
+            MethodHandle method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class, LiteralArgumentBuilder.class, CommandBuildContext.class, Supplier.class);
             try {
-                return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(name, Commands.literal(name), buildContext, obj.value());
+                return (LiteralArgumentBuilder<CommandSourceStack>) method.invoke(name, Commands.literal(name), buildContext, obj);
             } catch (Throwable th) {
                 throw new RuntimeException("An exception occurred while loading a command!", th);
             }

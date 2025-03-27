@@ -14,9 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public record JavaFunctionDefinition(Type type, String reference, Optional<Holder<StateObject<?>>> stateObject) {
@@ -50,17 +52,10 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
             }
 
         } else {
-
             try {
-                Class<?> clazz = Class.forName(reference);
-                if(!CommandFunction.class.isAssignableFrom(clazz)) {
-                    throw new IllegalArgumentException("Expected a class which implements CommandFunction!");
-                }
-                Constructor<?> constructor = clazz.getConstructor(ResourceLocation.class, obj.type());
-                return (CommandFunction<CommandSourceStack>) constructor.newInstance(id, obj.value());
-
-            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                     InstantiationException | IllegalAccessException ex) {
+                MethodHandle handle = Utils.findMethod(reference, CommandFunction.class, ResourceLocation.class, Supplier.class);
+                return (CommandFunction<CommandSourceStack>) handle.invoke(id, obj);
+            } catch (Throwable ex) {
                 throw new RuntimeException(ex);
 
             }

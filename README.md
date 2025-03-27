@@ -28,10 +28,10 @@ public static void method(CommandSourceStack css,
 ```
 If no state object is specified, The state object type is Void.
 
-If the type is `object`, `value` should be the fully qualified class name of a class which implements
-`CommandFunction<CommandSourceStack>`. The class should have a public constructor with the following signature:
+If the type is `object`, `value` should be method reference in the
+form `<fully.qualified.class.Name>::<method>`. The method with that name should have the following signature:
 ```java
-MyFunction(ResourceLocation id, S state);
+public static CommandFunction<CommandSourceStack> method(ResourceLocation id, Supplier<S> state);
 ```
 
 ### Command Definitions
@@ -81,7 +81,7 @@ public static LiteralArgumentBuilder<CommandSourceStack> method(
         String id, 
         LiteralArgumentBuilder<CommandSourceStack> builder, 
         CommandBuildContext ctx,
-        S state) { }
+        Supplier<S> state) { }
 ```
 
 ### State Objects

@@ -8,7 +8,6 @@ import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 import dev.jwall64.databridge.impl.Utils;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface ServerFunctionUtil {
