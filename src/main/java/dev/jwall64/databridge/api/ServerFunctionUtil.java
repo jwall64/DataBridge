@@ -5,7 +5,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
+import dev.jwall64.databridge.impl.CommandSourceStackExtension;
 import dev.jwall64.databridge.impl.Utils;
 
 import java.util.function.Function;
@@ -18,6 +20,10 @@ public interface ServerFunctionUtil {
 
     static void executeFunctionTag(MinecraftServer server, ResourceLocation tag, @Nullable CompoundTag with, @Nullable Function<CommandSourceStack, CommandSourceStack> sourceTransformer) {
         Utils.executeFunctionTag(server, tag, with, sourceTransformer);
+    }
+
+    static Entity getTriggerEntity(CommandSourceStack commandSourceStack) {
+        return ((CommandSourceStackExtension) commandSourceStack).getTriggerEntity();
     }
 
 }

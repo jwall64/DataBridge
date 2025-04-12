@@ -112,6 +112,14 @@ This method will be called after reloads and before server shutdown. The paramet
 parameter in the factory method. That is: the value returned the last time the factory method was called. On reload, 
 destructors are called after factories (if there is a previous instance available.)
 
+State objects can also be accessed from other methods by using the DataBridge API:
+```java
+MinecraftServer server = [ ... ];
+Optional<S> obj = ServerStateObjects.getStateObject(server, S.class, "namespace:path");
+
+RegistryAccess access = [ ... ];
+Optional<S> obj = ServerStateObjects.getStateObject(access, S.class, "namespace:path");
+```
 
 ### Interaction Entities
 Interaction entities can now directly execute functions, rather than just storing the last player who interacted with them.
@@ -137,13 +145,15 @@ The mod also adds a new entity selector type: `@t` This will target the entity w
 for example, functions called from interaction entities will have `@s` target to the player who interacted, and `@t` 
 target to the interaction entity itself.
 
-The trigger entity can be accessed from Java directly by compiling against this mod, and accessing its internal classes. 
-However, the internal structure of this mod is subject to change, so it is not recommended to compile against it for the 
-time being. 
+The trigger entity can be accessed from a CommandSourceStack in Java via two different methods:
 
-An alternative way of accessing the trigger entity from Java would be as follows:
-
+Using only Minecraft classes:
 ```java
 EntitySelector triggerSelector = new EntitySelectorParser(new StringReader("@t"), true).parse(); // Cache this 
 Entity trigger = triggerSelector.findSingleEntity(cs);
+```
+
+Using the DataBridge API:
+```java
+Entity trigger = ServerFunctionUtil.getTriggerEntity(cs);
 ```
