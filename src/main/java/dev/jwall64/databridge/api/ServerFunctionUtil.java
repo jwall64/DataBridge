@@ -26,4 +26,8 @@ public interface ServerFunctionUtil {
         return ((CommandSourceStackExtension) commandSourceStack).getTriggerEntity();
     }
 
+    static void setTriggerEntity(CommandSourceStack commandSourceStack, Entity entity) {
+        ((CommandSourceStackExtension) commandSourceStack).setTriggerEntity(entity);
+    }
+
 }
