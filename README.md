@@ -96,8 +96,7 @@ folder with the following format:
 ```
 `factory` should be a reference to a public method with the following signature:
 ```java
-public static S method(MinecraftServer server,
-                       @Nullable S prevInstance);
+public static S method(MinecraftServer server, @Nullable S prevInstance);
 ```
 Whenever data packs are reloaded, this method will be called, The value it returns should be an instance of `type` and is 
 the object which will be passed to functions and commands, if specified.
