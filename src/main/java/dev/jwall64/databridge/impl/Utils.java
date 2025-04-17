@@ -48,7 +48,6 @@ public class Utils {
     }
 
     public static void executeFunction(ServerFunctionManager manager, CommandFunction<CommandSourceStack> function, CompoundTag with, Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback resultCallback) {
-
         try {
             InstantiatedFunction<CommandSourceStack> instance = function.instantiate(with, manager.getDispatcher());
             CommandSourceStack source = sourceTransformer == null

@@ -2,6 +2,7 @@ package dev.jwall64.databridge.mixin;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +24,7 @@ public abstract class MixinMinecraftServer {
         });
     }
 
-    @Inject(method="stopServer", at=@At("HEAD"))
+    @Inject(method="stopServer", at=@At("TAIL"))
     private void onStop(CallbackInfo ci) {
         registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
             state.forEach(obj -> {
