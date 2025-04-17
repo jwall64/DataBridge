@@ -96,9 +96,7 @@ folder with the following format:
 ```
 `factory` should be a reference to a public method with the following signature:
 ```java
-public static S method(ReloadableServerResources resources, 
-                       ReloadableServerResources.LoadResult loadResult, 
-                       ResourceManager resourceManager,
+public static S method(MinecraftServer server,
                        @Nullable S prevInstance);
 ```
 Whenever data packs are reloaded, this method will be called, The value it returns should be an instance of `type` and is 
@@ -106,7 +104,7 @@ the object which will be passed to functions and commands, if specified.
 
 The `destructor` field is optional. If specified, it should have the following signature:
 ```java
-public static void method(S prevInstance);
+public static void method(MinecraftServer server, S prevInstance);
 ```
 This method will be called after reloads and before server shutdown. The parameter is always the same as the `prevInstance`
 parameter in the factory method. That is: the value returned the last time the factory method was called. On reload, 

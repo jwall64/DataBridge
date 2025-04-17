@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.jwall64.databridge.impl.DataBridgeRegistries;
 import dev.jwall64.databridge.impl.ServerFunctionLibraryExtension;
-import dev.jwall64.databridge.impl.StateObject;
 
 import java.util.List;
 import java.util.concurrent.CompletionStage;
@@ -33,10 +32,6 @@ public abstract class MixinServerResources {
                                         CallbackInfoReturnable<CompletionStage<?>> cir, @Local ReloadableServerResources built) {
 
         RegistryAccess.Frozen access = loadResult.layers().compositeAccess();
-
-        for(StateObject<?> obj : access.lookupOrThrow(DataBridgeRegistries.STATE_OBJECT)) {
-            obj.reload(built, loadResult, resourceManager);
-        }
 
         CommandBuildContext ctx = CommandBuildContext.simple(loadResult.lookupWithUpdatedTags(), featureFlagSet);
         access.lookupOrThrow(DataBridgeRegistries.COMMAND).entrySet().forEach(entry -> {

@@ -8,18 +8,39 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import dev.jwall64.databridge.impl.DataBridgeRegistries;
-import dev.jwall64.databridge.impl.StateObject;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer {
 
     @Shadow public abstract RegistryAccess.Frozen registryAccess();
 
-    @Inject(method="stopServer", at=@At("TAIL"))
+    @Inject(method="loadLevel", at=@At(value="HEAD"))
+    private void onInit(CallbackInfo ci) {
+        registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
+            state.forEach(obj -> {
+                obj.init((MinecraftServer) (Object) this);
+            });
+        });
+    }
+
+    @Inject(method="stopServer", at=@At("HEAD"))
     private void onStop(CallbackInfo ci) {
         registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
-            state.forEach(StateObject::unload);
+            state.forEach(obj -> {
+                obj.unload((MinecraftServer) (Object) this);
+            });
         });
+    }
+
+    @Inject(method="method_29440", at=@At("TAIL"))
+    private void onReload(CallbackInfo ci) {
+
+        registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
+            state.forEach(obj -> {
+                obj.reload((MinecraftServer) (Object) this);
+            });
+        });
+
     }
 
 }

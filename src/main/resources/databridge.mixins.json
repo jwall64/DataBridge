@@ -12,7 +12,8 @@
     "MixinMinecraftServer",
     "MixinPlayerList",
     "MixinServerFunctionLibrary",
-    "MixinServerResources"
+    "MixinServerResources",
+    "MixinTagLoader"
   ],
   "client": [],
   "server": [],

@@ -4,9 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.ReloadableServerRegistries;
-import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,11 +48,11 @@ public class StateObject<T> implements Supplier<T> {
     }
 
     private static <T> MethodType type(Class<T> type) {
-        return MethodType.methodType(type, ReloadableServerResources.class, ReloadableServerRegistries.LoadResult.class, ResourceManager.class, type);
+        return MethodType.methodType(type, MinecraftServer.class, type);
     }
 
     private static <T> MethodType destructorType(Class<T> type) {
-        return MethodType.methodType(Void.TYPE, type);
+        return MethodType.methodType(Void.TYPE, MinecraftServer.class, type);
     }
 
     public static final StateObject<Void> EMPTY = new StateObject<>(Void.class, "", MethodHandles.empty(type(Void.class)), null, null);
@@ -80,13 +78,13 @@ public class StateObject<T> implements Supplier<T> {
         return value;
     }
 
-    public void reload(ReloadableServerResources resources, ReloadableServerRegistries.LoadResult loadResult, ResourceManager resourceManager) {
+    public void reload(MinecraftServer server) {
         if(this == EMPTY) return;
         try {
             T oldValue = value;
-            value = type.cast(factory.invoke(resources, loadResult, resourceManager, oldValue));
+            value = type.cast(factory.invoke(server, oldValue));
             if(destructor != null && oldValue != null) {
-                destructor.invoke(oldValue);
+                destructor.invoke(server, oldValue);
             }
         } catch (Throwable th) {
             throw new RuntimeException(th);
@@ -106,10 +104,19 @@ public class StateObject<T> implements Supplier<T> {
                 .map(obj -> (StateObject<T>) obj);
     }
 
-    public void unload() {
+    public void init(MinecraftServer server) {
+        if(this == EMPTY) return;
+        try {
+            value = type.cast(factory.invoke(server, null));
+        } catch (Throwable th) {
+            throw new RuntimeException(th);
+        }
+    }
+
+    public void unload(MinecraftServer server) {
         if(destructor == null || value == null) return;
         try {
-            destructor.invoke(value);
+            destructor.invoke(server, value);
             value = null;
         } catch (Throwable th) {
             throw new RuntimeException(th);

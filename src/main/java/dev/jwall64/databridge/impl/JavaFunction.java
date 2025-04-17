@@ -24,9 +24,9 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
     private static final Logger log = LoggerFactory.getLogger(JavaFunction.class);
     private final ResourceLocation id;
     private final MethodHandle method;
-    private final Object stateObject;
+    private final StateObject<?> stateObject;
 
-    public JavaFunction(ResourceLocation id, MethodHandle method, Object stateObject) {
+    public JavaFunction(ResourceLocation id, MethodHandle method, StateObject<?> stateObject) {
         this.id = id;
         this.method = method;
         this.stateObject = stateObject;
@@ -67,7 +67,7 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
         @Override
         public void execute(CommandSourceStack stack, ExecutionContext<CommandSourceStack> ctx, Frame frame) {
             try {
-                method.invoke(stack, tag, id, dispatcher, ctx, frame, stateObject);
+                method.invoke(stack, tag, id, dispatcher, ctx, frame, stateObject.get());
             } catch (Throwable e) {
                 log.error("An error occurred while executing a java method function!", e);
             }

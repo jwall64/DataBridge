@@ -1,8 +1,6 @@
 package dev.jwall64.databridge;
 
-import net.minecraft.server.ReloadableServerRegistries;
-import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +11,12 @@ public class TestState {
     public int value = 0;
 
 
-    public static TestState create(ReloadableServerResources resources, ReloadableServerRegistries.LoadResult loadResult, ResourceManager resourceManager, @Nullable TestState previous) {
+    public static TestState create(MinecraftServer server, @Nullable TestState previous) {
         log.info("Creating new TestState");
         return new TestState();
     }
 
-    public static void cleanup(TestState state) {
+    public static void cleanup(MinecraftServer server, TestState state) {
         log.info("Cleaning up TestState {}", state.value);
     }
 

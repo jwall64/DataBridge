@@ -14,9 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -45,7 +42,7 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
                         Frame.class,
                         obj.type());
 
-                return new JavaFunction(id, method, obj.value());
+                return new JavaFunction(id, method, obj);
 
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
