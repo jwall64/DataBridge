@@ -23,7 +23,7 @@ public interface ServerStateObjects {
         return getStateObject(access, state, ResourceLocation.tryParse(id));
     }
 
-    static<T> Optional<T> getStateObject(RegistryAccess access, Class<T> type, ResourceLocation id) {
+    static <T> Optional<T> getStateObject(RegistryAccess access, Class<T> type, ResourceLocation id) {
         return StateObject.get(access, type, id)
                 .filter(StateObject::isPresent)
                 .map(StateObject::value);
