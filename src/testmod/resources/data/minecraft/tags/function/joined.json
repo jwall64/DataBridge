@@ -1,6 +1,6 @@
 {
-  "replace": false,
-  "values": [
-    "databridge:joined"
-  ]
+    "replace": false,
+    "values": [
+        "databridge:_joined"
+    ]
 }

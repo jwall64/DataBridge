@@ -25,18 +25,21 @@ public class Utils {
 
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
-    public static MethodHandle findMethod(String ref, Class<?> returnType, Class<?>... params) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
+    public static MethodHandle findMethod(String ref, Class<?> returnType, Class<?>... params)
+            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
 
         MethodType type = MethodType.methodType(returnType, params);
         return findMethod(ref, type);
 
     }
 
-    public static MethodHandle findMethod(String ref, MethodType type) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
+    public static MethodHandle findMethod(String ref, MethodType type)
+            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
 
         String[] parts = ref.split("::");
-        if(parts.length != 2) {
-            throw new IllegalArgumentException("Expected a function value in the form <fully.qualified.class.Name>::<method>");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException(
+                    "Expected a function value in the form <fully.qualified.class.Name>::<method>");
         }
 
         String className = parts[0];
@@ -47,7 +50,9 @@ public class Utils {
 
     }
 
-    public static void executeFunction(ServerFunctionManager manager, CommandFunction<CommandSourceStack> function, CompoundTag with, Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback resultCallback) {
+    public static void executeFunction(ServerFunctionManager manager, CommandFunction<CommandSourceStack> function,
+            CompoundTag with, Function<CommandSourceStack, CommandSourceStack> sourceTransformer,
+            CommandResultCallback resultCallback) {
         try {
             InstantiatedFunction<CommandSourceStack> instance = function.instantiate(with, manager.getDispatcher());
             CommandSourceStack source = sourceTransformer == null
@@ -62,16 +67,17 @@ public class Utils {
 
     }
 
-
-    public static void executeFunction(MinecraftServer server, ResourceLocation id, CompoundTag with, Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback resultCallback) {
+    public static void executeFunction(MinecraftServer server, ResourceLocation id, CompoundTag with,
+            Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback resultCallback) {
         ServerFunctionManager manager = server.getFunctions();
         manager.get(id).ifPresent(func -> executeFunction(manager, func, with, sourceTransformer, resultCallback));
     }
 
-    public static void executeFunctionTag(MinecraftServer server, ResourceLocation id, CompoundTag with, Function<CommandSourceStack, CommandSourceStack> sourceTransformer) {
+    public static void executeFunctionTag(MinecraftServer server, ResourceLocation id, CompoundTag with,
+            Function<CommandSourceStack, CommandSourceStack> sourceTransformer) {
         ServerFunctionManager manager = server.getFunctions();
-        server.getFunctions().getTag(id).forEach(func -> executeFunction(manager, func, with, sourceTransformer, CommandResultCallback.EMPTY));
+        server.getFunctions().getTag(id)
+                .forEach(func -> executeFunction(manager, func, with, sourceTransformer, CommandResultCallback.EMPTY));
     }
-
 
 }

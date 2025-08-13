@@ -38,7 +38,8 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
     }
 
     @Override
-    public @NotNull InstantiatedFunction<CommandSourceStack> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<CommandSourceStack> commandDispatcher) {
+    public @NotNull InstantiatedFunction<CommandSourceStack> instantiate(@Nullable CompoundTag compoundTag,
+            CommandDispatcher<CommandSourceStack> commandDispatcher) {
         return new Instance(compoundTag, commandDispatcher);
     }
 

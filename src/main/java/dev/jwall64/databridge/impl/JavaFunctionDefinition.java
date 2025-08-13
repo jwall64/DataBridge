@@ -18,19 +18,20 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public record JavaFunctionDefinition(Type type, String reference, Optional<Holder<StateObject<?>>> stateObject) {
+public record JavaFunctionDefinition(Type type, String reference,
+        Optional<Holder<StateObject<?>>> stateObject) {
 
     public static final Codec<JavaFunctionDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Type.CODEC.optionalFieldOf("type", Type.METHOD).forGetter(JavaFunctionDefinition::type),
             Codec.STRING.fieldOf("value").forGetter(JavaFunctionDefinition::reference),
-            RegistryFixedCodec.create(DataBridgeRegistries.STATE_OBJECT).optionalFieldOf("state_object").forGetter(JavaFunctionDefinition::stateObject)
-    ).apply(instance, JavaFunctionDefinition::new));
+            RegistryFixedCodec.create(DataBridgeRegistries.STATE_OBJECT).optionalFieldOf("state_object")
+                    .forGetter(JavaFunctionDefinition::stateObject))
+            .apply(instance, JavaFunctionDefinition::new));
 
-    @SuppressWarnings("unchecked")
     public CommandFunction<CommandSourceStack> getFunction(ResourceLocation id) {
 
         StateObject<?> obj = stateObject.isPresent() ? stateObject.orElseThrow().value() : StateObject.EMPTY;
-        if(type == Type.METHOD) {
+        if (type == Type.METHOD) {
             try {
 
                 MethodHandle method = Utils.findMethod(reference, void.class,
@@ -50,7 +51,8 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
 
         } else {
             try {
-                MethodHandle handle = Utils.findMethod(reference, CommandFunction.class, ResourceLocation.class, Supplier.class);
+                MethodHandle handle = Utils.findMethod(reference, CommandFunction.class, ResourceLocation.class,
+                        Supplier.class);
                 return (CommandFunction<CommandSourceStack>) handle.invoke(id, obj);
             } catch (Throwable ex) {
                 throw new RuntimeException(ex);
@@ -65,6 +67,7 @@ public record JavaFunctionDefinition(Type type, String reference, Optional<Holde
         OBJECT("object");
 
         private final String id;
+
         Type(String id) {
             this.id = id;
         }
