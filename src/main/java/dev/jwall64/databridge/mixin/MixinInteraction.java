@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
@@ -71,10 +72,11 @@ public class MixinInteraction {
             return;
 
         Interaction self = (Interaction) (Object) this;
-        MinecraftServer server = self.getServer();
+        MinecraftServer server = ((ServerLevel) self.level()).getServer();
         if (server == null)
             return;
 
+        CommandBlockEntity ent;
         CommandSourceStack cs = new CommandSourceStack(databridge$commandSource,
                 self.position(),
                 self.getRotationVector(),

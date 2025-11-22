@@ -15,13 +15,12 @@ public class MixinFunctionCommand {
 
     @Redirect(method = "method_13382", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerFunctionManager;getFunctionNames()Ljava/lang/Iterable;"))
     private static Iterable<ResourceLocation> redirectNames(ServerFunctionManager manager) {
-        System.out.println("Suggested functions");
 
         List<ResourceLocation> out = new ArrayList<>();
         Iterator<ResourceLocation> it = manager.getFunctionNames().iterator();
         while (it.hasNext()) {
             ResourceLocation loc = it.next();
-            if (!loc.getPath().startsWith("_")) {
+            if (loc.getPath().charAt(0) != '_') {
                 out.add(loc);
             }
         }

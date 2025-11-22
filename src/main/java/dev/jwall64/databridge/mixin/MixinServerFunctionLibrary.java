@@ -38,9 +38,9 @@ public class MixinServerFunctionLibrary {
     @ModifyVariable(method="reload", at=@At(value="STORE"), ordinal=1)
     private CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>> modifyFunctionMap(
             CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>> og,
-            PreparableReloadListener.PreparationBarrier preparationBarrier,
-            ResourceManager resourceManager,
+            PreparableReloadListener.SharedState state,
             Executor executor,
+            PreparableReloadListener.PreparationBarrier preparationBarrier,
             Executor executor2) {
 
         if(databridge$javaFunctions == null || databridge$javaFunctions.size() == 0) {
