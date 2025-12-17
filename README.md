@@ -20,7 +20,7 @@ form `<fully.qualified.class.Name>::<method>`. The method with that name should 
 ```java
 public static void method(CommandSourceStack css,
             CompoundTag tag,
-            ResourceLocation id,
+            Identifier id,
             CommandDispatcher<CommandSourceStack> dispatcher,
             ExecutionContext<CommandSourceStack> ctx,
             Frame frame,
@@ -31,7 +31,7 @@ If no state object is specified, The state object type is Void.
 If the type is `object`, `value` should be method reference in the
 form `<fully.qualified.class.Name>::<method>`. The method with that name should have the following signature:
 ```java
-public static CommandFunction<CommandSourceStack> method(ResourceLocation id, Supplier<S> state);
+public static CommandFunction<CommandSourceStack> method(Identifier id, Supplier<S> state);
 ```
 
 ### Command Definitions

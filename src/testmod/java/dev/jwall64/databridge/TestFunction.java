@@ -14,7 +14,7 @@ import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +31,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
 
     public static void funcTest(CommandSourceStack css,
                                 CompoundTag tag,
-                                ResourceLocation id,
+                                Identifier id,
                                 CommandDispatcher<CommandSourceStack> dispatcher,
                                 ExecutionContext<CommandSourceStack> ctx,
                                 Frame frame,
@@ -44,7 +44,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
 
     public static void funcTestLoad(CommandSourceStack css,
                                 CompoundTag tag,
-                                ResourceLocation id,
+                                Identifier id,
                                 CommandDispatcher<CommandSourceStack> dispatcher,
                                 ExecutionContext<CommandSourceStack> ctx,
                                 Frame frame,
@@ -56,7 +56,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
 
     public static void funcInteract(CommandSourceStack css,
                                     CompoundTag tag,
-                                    ResourceLocation id,
+                                    Identifier id,
                                     CommandDispatcher<CommandSourceStack> dispatcher,
                                     ExecutionContext<CommandSourceStack> ctx,
                                     Frame frame,
@@ -76,21 +76,21 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
         frame.returnSuccess(data.value);
     }
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Supplier<TestState> data;
 
-    public TestFunction(ResourceLocation id, Supplier<TestState> data) {
+    public TestFunction(Identifier id, Supplier<TestState> data) {
         this.id = id;
         this.data = data;
     }
 
-    public static CommandFunction<CommandSourceStack> create(ResourceLocation id, Supplier<TestState> data) {
+    public static CommandFunction<CommandSourceStack> create(Identifier id, Supplier<TestState> data) {
         return new TestFunction(id, data);
     }
 
 
     @Override
-    public @NotNull ResourceLocation id() {
+    public @NotNull Identifier id() {
         return id;
     }
 
@@ -98,7 +98,7 @@ public class TestFunction implements CommandFunction<CommandSourceStack> {
     public @NotNull InstantiatedFunction<CommandSourceStack> instantiate(@Nullable CompoundTag tag, CommandDispatcher<CommandSourceStack> dispatcher) throws FunctionInstantiationException {
         return new InstantiatedFunction<>() {
             @Override
-            public @NotNull ResourceLocation id() {
+            public @NotNull Identifier id() {
                 return id;
             }
 

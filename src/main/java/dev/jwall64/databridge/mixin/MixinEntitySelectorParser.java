@@ -7,13 +7,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -70,12 +73,12 @@ public abstract class MixinEntitySelectorParser {
 
     }
 
-    @WrapOperation(method="getSelector", at=@At(value="NEW", target="(IZZLjava/util/List;Lnet/minecraft/advancements/critereon/MinMaxBounds$Doubles;Ljava/util/function/Function;Lnet/minecraft/world/phys/AABB;Ljava/util/function/BiConsumer;ZLjava/lang/String;Ljava/util/UUID;Lnet/minecraft/world/entity/EntityType;Z)Lnet/minecraft/commands/arguments/selector/EntitySelector;"))
-    private EntitySelector wrapCreateSelector(
-            int maxResults, boolean includeEntities, boolean worldLimited, List<Predicate<Entity>> predicates,
-            MinMaxBounds.Doubles distance, Function<Vec3, Vec3> function, AABB bounds,
-            BiConsumer<Vec3, List<? extends Entity>> order, boolean currentEntity, String playerName, UUID uuid,
-            EntityType<?> type, boolean usesSelectors, Operation<EntitySelector> original) {
+    @WrapOperation(method="getSelector", at=@At(value="NEW", target="(IZZLjava/util/List;Lnet/minecraft/advancements/criterion/MinMaxBounds$Doubles;Ljava/util/function/Function;Lnet/minecraft/world/phys/AABB;Ljava/util/function/BiConsumer;ZLjava/lang/String;Ljava/util/UUID;Lnet/minecraft/world/entity/EntityType;Z)Lnet/minecraft/commands/arguments/selector/EntitySelector;"))
+    private EntitySelector wrapCreateSelector(int maxResults, boolean includeEntities, boolean worldLimited,
+                                              List<Predicate<Entity>> predicates, MinMaxBounds.@Nullable Doubles distance,
+                                              Function<Vec3, Vec3> function, @Nullable AABB bounds, BiConsumer<Vec3, List<? extends Entity>> order,
+                                              boolean currentEntity, @Nullable String playerName, @Nullable UUID uuid,
+                                              @Nullable EntityType<?> type, boolean usesSelectors, Operation<EntitySelector> original) {
 
         EntitySelector out = original.call(maxResults, includeEntities, worldLimited, predicates, distance, function,
                 bounds, order, currentEntity, playerName, uuid, type, usesSelectors);

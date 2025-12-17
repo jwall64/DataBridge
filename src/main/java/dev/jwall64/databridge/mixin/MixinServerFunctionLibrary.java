@@ -5,10 +5,9 @@ import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.ServerFunctionLibrary;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +35,8 @@ public class MixinServerFunctionLibrary {
 
 
     @ModifyVariable(method="reload", at=@At(value="STORE"), ordinal=1)
-    private CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>> modifyFunctionMap(
-            CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>> og,
+    private CompletableFuture<Map<Identifier, CompletableFuture<CommandFunction<CommandSourceStack>>>> modifyFunctionMap(
+            CompletableFuture<Map<Identifier, CompletableFuture<CommandFunction<CommandSourceStack>>>> og,
             PreparableReloadListener.SharedState state,
             Executor executor,
             PreparableReloadListener.PreparationBarrier preparationBarrier,
@@ -49,7 +48,7 @@ public class MixinServerFunctionLibrary {
 
         return og.thenCompose(map -> {
             for(Holder<JavaFunctionDefinition> entry : databridge$javaFunctions) {
-                ResourceLocation id = entry.unwrapKey().orElseThrow().location();
+                Identifier id = entry.unwrapKey().orElseThrow().identifier();
                 map.put(id, CompletableFuture.supplyAsync(() -> entry.value().getFunction(id), executor));
             }
             databridge$javaFunctions = null;

@@ -30,7 +30,7 @@ dependencies {
     }
 
 
-    include(modApi("me.lucko:fabric-permissions-api:0.4.0") {
+    include(modApi("me.lucko:fabric-permissions-api:0.6.1") {
         isTransitive = false
     })
 

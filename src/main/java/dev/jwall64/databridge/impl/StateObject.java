@@ -3,7 +3,7 @@ package dev.jwall64.databridge.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -96,7 +96,7 @@ public class StateObject<T> implements Supplier<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Optional<StateObject<T>> get(RegistryAccess access, Class<T> type, ResourceLocation location) {
+    public static <T> Optional<StateObject<T>> get(RegistryAccess access, Class<T> type, Identifier location) {
 
         return access.lookup(DataBridgeRegistries.STATE_OBJECT)
                 .map(reg -> reg.getValue(location))

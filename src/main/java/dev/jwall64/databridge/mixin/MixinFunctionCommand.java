@@ -6,7 +6,7 @@ import java.util.List;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.server.commands.*;
 
@@ -14,12 +14,12 @@ import net.minecraft.server.commands.*;
 public class MixinFunctionCommand {
 
     @Redirect(method = "method_13382", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerFunctionManager;getFunctionNames()Ljava/lang/Iterable;"))
-    private static Iterable<ResourceLocation> redirectNames(ServerFunctionManager manager) {
+    private static Iterable<Identifier> redirectNames(ServerFunctionManager manager) {
 
-        List<ResourceLocation> out = new ArrayList<>();
-        Iterator<ResourceLocation> it = manager.getFunctionNames().iterator();
+        List<Identifier> out = new ArrayList<>();
+        Iterator<Identifier> it = manager.getFunctionNames().iterator();
         while (it.hasNext()) {
-            ResourceLocation loc = it.next();
+            Identifier loc = it.next();
             if (loc.getPath().charAt(0) != '_') {
                 out.add(loc);
             }

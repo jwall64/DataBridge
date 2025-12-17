@@ -6,7 +6,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import org.jetbrains.annotations.Nullable;
 import dev.jwall64.databridge.api.ServerStateObjects;
@@ -36,7 +36,7 @@ public class TestCommand {
                 })).then(Commands.literal("data")
                         .executes(ctx -> {
                             Optional<TestState> state = ServerStateObjects.getStateObject(ctx.getSource().getServer(),
-                                    TestState.class, ResourceLocation.tryBuild("databridge", "test"));
+                                    TestState.class, Identifier.tryBuild("databridge", "test"));
                             if (state.isEmpty() || state.get() != data.get())
                                 return 0;
 

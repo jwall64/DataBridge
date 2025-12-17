@@ -8,12 +8,16 @@ import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.permissions.PermissionLevel;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.mojang.serialization.Codec;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -67,17 +71,19 @@ public class Utils {
 
     }
 
-    public static void executeFunction(MinecraftServer server, ResourceLocation id, CompoundTag with,
+    public static void executeFunction(MinecraftServer server, Identifier id, CompoundTag with,
             Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback resultCallback) {
         ServerFunctionManager manager = server.getFunctions();
         manager.get(id).ifPresent(func -> executeFunction(manager, func, with, sourceTransformer, resultCallback));
     }
 
-    public static void executeFunctionTag(MinecraftServer server, ResourceLocation id, CompoundTag with,
+    public static void executeFunctionTag(MinecraftServer server, Identifier id, CompoundTag with,
             Function<CommandSourceStack, CommandSourceStack> sourceTransformer) {
         ServerFunctionManager manager = server.getFunctions();
         server.getFunctions().getTag(id)
                 .forEach(func -> executeFunction(manager, func, with, sourceTransformer, CommandResultCallback.EMPTY));
     }
+
+    public static final Codec<PermissionLevel> PERMISSION_LEVEL_OR_INT = Codec.withAlternative(PermissionLevel.CODEC, PermissionLevel.INT_CODEC);
 
 }

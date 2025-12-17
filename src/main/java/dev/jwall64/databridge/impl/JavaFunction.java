@@ -8,7 +8,7 @@ import net.minecraft.commands.execution.UnboundEntryAction;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,18 +22,18 @@ import java.util.List;
 public class JavaFunction implements CommandFunction<CommandSourceStack> {
 
     private static final Logger log = LoggerFactory.getLogger(JavaFunction.class);
-    private final ResourceLocation id;
+    private final Identifier id;
     private final MethodHandle method;
     private final StateObject<?> stateObject;
 
-    public JavaFunction(ResourceLocation id, MethodHandle method, StateObject<?> stateObject) {
+    public JavaFunction(Identifier id, MethodHandle method, StateObject<?> stateObject) {
         this.id = id;
         this.method = method;
         this.stateObject = stateObject;
     }
 
     @Override
-    public @NotNull ResourceLocation id() {
+    public @NotNull Identifier id() {
         return id;
     }
 
@@ -56,7 +56,7 @@ public class JavaFunction implements CommandFunction<CommandSourceStack> {
         }
 
         @Override
-        public @NotNull ResourceLocation id() {
+        public @NotNull Identifier id() {
             return id;
         }
 

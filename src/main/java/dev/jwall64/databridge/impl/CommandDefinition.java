@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -13,15 +14,21 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionCheck;
+import net.minecraft.server.permissions.PermissionLevel;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public record CommandDefinition(Type type, String value, int permissionLevel,
+public record CommandDefinition(Type type, String value, PermissionLevel permissionLevel,
         Optional<String> permissionNode, Commands.CommandSelection environment,
         Optional<Holder<StateObject<?>>> state) {
 
@@ -43,7 +50,7 @@ public record CommandDefinition(Type type, String value, int permissionLevel,
     public static final Codec<CommandDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Type.CODEC.optionalFieldOf("type", Type.ALIAS).forGetter(CommandDefinition::type),
             Codec.STRING.fieldOf("value").forGetter(CommandDefinition::value),
-            Codec.INT.optionalFieldOf("permission_level", 0).forGetter(CommandDefinition::permissionLevel),
+            PermissionLevel.CODEC.optionalFieldOf("permission_level", PermissionLevel.ALL).forGetter(CommandDefinition::permissionLevel),
             Codec.STRING.optionalFieldOf("permission_node").forGetter(CommandDefinition::permissionNode),
             COMMAND_SELECTION_CODEC.optionalFieldOf("environment", Commands.CommandSelection.ALL)
                     .forGetter(CommandDefinition::environment),
@@ -70,7 +77,7 @@ public record CommandDefinition(Type type, String value, int permissionLevel,
             case ALIAS -> Commands.literal(name).executes(ctx -> {
 
                 MinecraftServer server = ctx.getSource().getServer();
-                CommandSourceStack source = ctx.getSource().withPermission(server.getFunctionCompilationLevel());
+                CommandSourceStack source = ctx.getSource().withPermission(server.getFunctionCompilationPermissions());
 
                 server.getCommands().performPrefixedCommand(source, value);
                 return 1;
@@ -94,11 +101,11 @@ public record CommandDefinition(Type type, String value, int permissionLevel,
             case BUILDER -> fromBuilder(name, buildCtx);
         };
 
-        if (permissionLevel > 0) {
+        if (permissionLevel != PermissionLevel.ALL) {
             if (permissionNode.isPresent()) {
-                out = out.requires(Permissions.require(permissionNode.orElseThrow(), permissionLevel));
+                out = out.requires(Permissions.require(permissionNode.orElseThrow(), permissionLevel.id()));
             } else {
-                out = out.requires((ctx) -> ctx.hasPermission(permissionLevel));
+                out = out.requires(Commands.hasPermission(new PermissionCheck.Require(new Permission.HasCommandLevel(permissionLevel))));
             }
         }
 
@@ -110,31 +117,68 @@ public record CommandDefinition(Type type, String value, int permissionLevel,
         try {
 
             StateObject<?> obj = state.isPresent() ? state.orElseThrow().value() : StateObject.EMPTY;
-            MethodHandle method;
-            boolean newSig = true;
 
-            try {
-                method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class,
-                        LiteralArgumentBuilder.class, CommandBuildContext.class, int.class, String.class,
-                        Supplier.class);
-            } catch (NoSuchMethodException | IllegalAccessException e) {
-                newSig = false;
-                method = Utils.findMethod(value, LiteralArgumentBuilder.class, String.class,
-                        LiteralArgumentBuilder.class, CommandBuildContext.class, Supplier.class);
+            LiteralArgumentBuilder<CommandSourceStack> out = Commands.literal(name); 
+            MethodPrefab permLevel = MethodPrefab.fromList(LiteralArgumentBuilder.class, List.of(
+                Pair.of(String.class, name),
+                Pair.of(LiteralArgumentBuilder.class, out),
+                Pair.of(CommandBuildContext.class, buildContext),
+                Pair.of(PermissionLevel.class, permissionLevel),
+                Pair.of(String.class, permissionNode.orElse(null)),
+                Pair.of(Supplier.class, obj)));
+
+            MethodPrefab permNumber = MethodPrefab.fromList(LiteralArgumentBuilder.class, List.of(
+                Pair.of(String.class, name),
+                Pair.of(LiteralArgumentBuilder.class, out),
+                Pair.of(CommandBuildContext.class, buildContext),
+                Pair.of(int.class, permissionLevel.id()),
+                Pair.of(String.class, permissionNode.orElse(null)),
+                Pair.of(Supplier.class, obj)));
+
+            MethodPrefab simple = MethodPrefab.fromList(LiteralArgumentBuilder.class, List.of(
+                Pair.of(String.class, name),
+                Pair.of(LiteralArgumentBuilder.class, out),
+                Pair.of(CommandBuildContext.class, buildContext),
+                Pair.of(Supplier.class, obj)));
+
+            MethodPrefab[] prefabs = { permLevel, permNumber, simple };
+
+            Throwable findMethodException = null;
+            for(MethodPrefab prefab : prefabs) {
+                try {
+                    MethodHandle handle = Utils.findMethod(value, prefab.type());
+                    try {
+                        return (LiteralArgumentBuilder<CommandSourceStack>) (handle.invokeWithArguments(prefab.arguments()));
+                    } catch(Throwable th) {
+                        throw new RuntimeException("An exception occurred while loading a command!", th);
+                    }
+                } catch(NoSuchMethodException | IllegalAccessException e) {
+                    findMethodException = e;
+                }
             }
 
-            try {
-                return (LiteralArgumentBuilder<CommandSourceStack>) (newSig
-                        ? method.invoke(name, Commands.literal(name),
-                                buildContext, permissionLevel, permissionNode.orElse(null), obj)
-                        : method.invoke(name, Commands.literal(name), buildContext, obj));
-            } catch (Throwable th) {
-                throw new RuntimeException("An exception occurred while loading a command!", th);
-            }
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException("Unable to access method handle for " + value + "!", findMethodException);
+
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException("Unable to access method handle for " + value + "!", e);
         }
     }
+
+    private record MethodPrefab(MethodType type, Object[] arguments) {
+        static MethodPrefab fromList(Class<?> returnType, List<Pair<Class<?>, Object>> arguments) {
+            
+            Class<?> types[] = new Class<?>[arguments.size()];
+            Object[] args = new Object[arguments.size()];
+            int index = 0;
+            for(Pair<Class<?>, Object> ent : arguments) {
+                types[index] = ent.getFirst();
+                args[index++] = ent.getSecond();
+            }
+
+            return new MethodPrefab(MethodType.methodType(returnType, types), args);
+        }
+    }
+
 
     enum Type {
         ALIAS("alias"),

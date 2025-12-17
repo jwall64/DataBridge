@@ -9,8 +9,9 @@ import net.minecraft.commands.execution.Frame;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandle;
@@ -28,7 +29,7 @@ public record JavaFunctionDefinition(Type type, String reference,
                     .forGetter(JavaFunctionDefinition::stateObject))
             .apply(instance, JavaFunctionDefinition::new));
 
-    public CommandFunction<CommandSourceStack> getFunction(ResourceLocation id) {
+    public CommandFunction<CommandSourceStack> getFunction(Identifier id) {
 
         StateObject<?> obj = stateObject.isPresent() ? stateObject.orElseThrow().value() : StateObject.EMPTY;
         if (type == Type.METHOD) {
@@ -37,7 +38,7 @@ public record JavaFunctionDefinition(Type type, String reference,
                 MethodHandle method = Utils.findMethod(reference, void.class,
                         CommandSourceStack.class,
                         CompoundTag.class,
-                        ResourceLocation.class,
+                        Identifier.class,
                         CommandDispatcher.class,
                         ExecutionContext.class,
                         Frame.class,
@@ -51,7 +52,7 @@ public record JavaFunctionDefinition(Type type, String reference,
 
         } else {
             try {
-                MethodHandle handle = Utils.findMethod(reference, CommandFunction.class, ResourceLocation.class,
+                MethodHandle handle = Utils.findMethod(reference, CommandFunction.class, Identifier.class,
                         Supplier.class);
                 return (CommandFunction<CommandSourceStack>) handle.invoke(id, obj);
             } catch (Throwable ex) {

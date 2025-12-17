@@ -9,10 +9,12 @@ import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -20,7 +22,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
@@ -45,8 +46,8 @@ public class MixinInteraction {
     private static final Logger databridge$LOGGER = LoggerFactory.getLogger("databridge");
 
     @Unique
-    private static final Codec<List<Pair<ResourceLocation, CompoundTag>>> databridge$FUNCTION_CODEC = new UnboundedMapCodec<>(
-            ResourceLocation.CODEC, CompoundTag.CODEC)
+    private static final Codec<List<Pair<Identifier, CompoundTag>>> databridge$FUNCTION_CODEC = new UnboundedMapCodec<>(
+            Identifier.CODEC, CompoundTag.CODEC)
             .xmap(map -> {
                 return map.entrySet().stream()
                         .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
@@ -57,16 +58,16 @@ public class MixinInteraction {
             });
 
     @Unique
-    private List<Pair<ResourceLocation, CompoundTag>> databridge$functions;
+    private List<Pair<Identifier, CompoundTag>> databridge$functions;
 
     @Unique
-    private List<Pair<ResourceLocation, CompoundTag>> databridge$attackFunctions;
+    private List<Pair<Identifier, CompoundTag>> databridge$attackFunctions;
 
     @Unique
     private CommandSource databridge$commandSource;
 
     @Unique
-    private void executeFunctions(List<Pair<ResourceLocation, CompoundTag>> functions, ServerPlayer player) {
+    private void executeFunctions(List<Pair<Identifier, CompoundTag>> functions, ServerPlayer player) {
 
         if (functions == null || functions.isEmpty())
             return;
@@ -76,18 +77,17 @@ public class MixinInteraction {
         if (server == null)
             return;
 
-        CommandBlockEntity ent;
         CommandSourceStack cs = new CommandSourceStack(databridge$commandSource,
                 self.position(),
                 self.getRotationVector(),
                 (ServerLevel) self.level(),
-                2,
+                LevelBasedPermissionSet.forLevel(PermissionLevel.GAMEMASTERS),
                 self.getName().getString(), self.getName(),
                 server,
                 player);
         ((CommandSourceStackExtension) cs).setTriggerEntity(self);
 
-        for (Pair<ResourceLocation, CompoundTag> fn : functions) {
+        for (Pair<Identifier, CompoundTag> fn : functions) {
             server.getFunctions().get(fn.getFirst()).ifPresent(cf -> {
                 try {
                     InstantiatedFunction<CommandSourceStack> instantiatedFunction = cf.instantiate(fn.getSecond(),

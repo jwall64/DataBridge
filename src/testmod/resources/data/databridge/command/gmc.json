@@ -2,5 +2,5 @@
   "name": "gmc",
   "type": "alias",
   "value": "gamemode creative",
-  "permission_level": 2
+  "permission_level": "gamemasters"
 }
