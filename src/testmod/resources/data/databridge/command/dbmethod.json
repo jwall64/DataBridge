@@ -1,6 +1,0 @@
-{
-  "name": "dbmethod",
-  "type": "method",
-  "value": "dev.jwall64.databridge.TestCommand::execute",
-  "state_object": "databridge:test"
-}

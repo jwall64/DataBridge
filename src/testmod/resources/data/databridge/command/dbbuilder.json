@@ -1,8 +1,0 @@
-{
-    "name": "dbbuilder",
-    "type": "builder",
-    "value": "dev.jwall64.databridge.TestCommand::builder",
-    "state_object": "databridge:test",
-    "permission_level": "gamemasters",
-    "permission_node": "databridge.test"
-}

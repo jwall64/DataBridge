@@ -10,6 +10,18 @@ plugins {
     id("com.gradleup.shadow")
 }
 
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "${rootProject.name}-tests"
+        enableGameTests = true
+        enableClientGameTests = true
+        eula = true
+        clearRunDirectory = true
+        username = "Player0"
+    }
+}
+
 loom {
     runs {
         getByName("client") {
@@ -21,6 +33,20 @@ loom {
             runDir = "run/server"
             ideConfigGenerated(false)
             server()
+        }
+        register("testClient") {
+            name = "Test Client"
+            runDir = "run/testClient"
+            ideConfigGenerated(false)
+            client()
+            source(sourceSets.getByName("gametest"))
+        }
+        register("testServer") {
+            name = "Test Server"
+            runDir = "run/testServer"
+            ideConfigGenerated(false)
+            server()
+            source(sourceSets.getByName("gametest"))
         }
     }
     mixin {
@@ -65,3 +91,4 @@ tasks.named<RemapSourcesJarTask>("remapSourcesJar") {
 tasks.named<ShadowJar>("shadowJar") {
     enabled = false
 }
+

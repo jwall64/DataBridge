@@ -1,1 +1,0 @@
-tellraw @s {"selector":"@s","extra":[{"text":" attacked "},{"selector":"@t"}]}

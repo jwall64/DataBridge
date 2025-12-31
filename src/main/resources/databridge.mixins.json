@@ -4,6 +4,7 @@
     "package": "dev.jwall64.databridge.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "AccessorExecutionContext",
         "MixinCommandSourceStack",
         "MixinDataLoader",
         "MixinEntitySelector",

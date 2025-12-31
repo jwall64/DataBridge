@@ -1,0 +1,5 @@
+{
+  "type": "dev.jwall64.databridge.test.TestState",
+  "factory": "dev.jwall64.databridge.test.TestState::create",
+  "destructor": "dev.jwall64.databridge.test.TestState::cleanup"
+}

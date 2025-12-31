@@ -1,7 +1,0 @@
-{
-    "replace": false,
-    "values": [
-        "databridge:_load",
-        "databridge:_load_mc"
-    ]
-}

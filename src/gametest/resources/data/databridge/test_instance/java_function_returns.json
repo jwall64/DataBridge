@@ -1,0 +1,6 @@
+{
+  "type": "block_based",
+  "max_ticks": 4,
+  "structure": "databridge:java_function_returns",
+  "environment": "databridge:main"
+}

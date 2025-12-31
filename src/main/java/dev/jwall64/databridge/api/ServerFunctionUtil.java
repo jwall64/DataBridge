@@ -14,6 +14,14 @@ import java.util.function.Function;
 
 public interface ServerFunctionUtil {
 
+    /**
+     * Executes the function with the given ID on the server.
+     * @param server The server to run the function on
+     * @param id the ID of the function to run
+     * @param with the parameters of the function
+     * @param sourceTransformer some logic to transform the command source before invoking the function
+     * @param callback some code to run when the function returns
+     */
     static void executeFunction(MinecraftServer server, Identifier id, @Nullable CompoundTag with, @Nullable Function<CommandSourceStack, CommandSourceStack> sourceTransformer, CommandResultCallback callback) {
         Utils.executeFunction(server, id, with, sourceTransformer, callback);
     }

@@ -67,7 +67,7 @@ public class MixinInteraction {
     private CommandSource databridge$commandSource;
 
     @Unique
-    private void executeFunctions(List<Pair<Identifier, CompoundTag>> functions, ServerPlayer player) {
+    private void executeFunctions(List<Pair<Identifier, CompoundTag>> functions, Entity entity) {
 
         if (functions == null || functions.isEmpty())
             return;
@@ -84,7 +84,7 @@ public class MixinInteraction {
                 LevelBasedPermissionSet.forLevel(PermissionLevel.GAMEMASTERS),
                 self.getName().getString(), self.getName(),
                 server,
-                player);
+                entity);
         ((CommandSourceStackExtension) cs).setTriggerEntity(self);
 
         for (Pair<Identifier, CompoundTag> fn : functions) {
@@ -151,14 +151,12 @@ public class MixinInteraction {
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Interaction$PlayerAction;<init>(Ljava/util/UUID;J)V"))
     private void onInteract(Player player, InteractionHand interactionHand,
             CallbackInfoReturnable<InteractionResult> cir) {
-        executeFunctions(databridge$functions, (ServerPlayer) player);
+        executeFunctions(databridge$functions, player);
     }
 
     @Inject(method = "skipAttackInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Interaction$PlayerAction;<init>(Ljava/util/UUID;J)V"))
     private void onAttack(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        if (entity instanceof ServerPlayer spl) {
-            executeFunctions(databridge$attackFunctions, spl);
-        }
+        executeFunctions(databridge$attackFunctions, entity);
     }
 
 }

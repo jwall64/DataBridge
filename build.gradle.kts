@@ -7,13 +7,6 @@ plugins {
 
 Utils.setupResources(project, rootProject, "fabric.mod.json")
 
-sourceSets {
-    register("testmod") {
-        compileClasspath += sourceSets.main.get().compileClasspath
-        runtimeClasspath += sourceSets.main.get().runtimeClasspath
-    }
-}
-
 dependencies {
 
     minecraft("com.mojang:minecraft:${project.properties["minecraft-version"]}")
@@ -29,26 +22,17 @@ dependencies {
         modApi(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
     }
 
-
     include(modApi("me.lucko:fabric-permissions-api:0.6.1") {
         isTransitive = false
     })
 
-    "testmodImplementation"(sourceSets.main.get().output)
+    // Gametest API modules
+    val testApiModules = listOf(
+        "fabric-gametest-api-v1",
+        "fabric-registry-sync-v0"
+    )
+    for(mod in testApiModules) {
+        modGametestImplementation(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))
+    }
 }
 
-loom {
-    mods {
-        register(project.name + "-testmod") {
-            sourceSet(sourceSets["testmod"])
-        }
-    }
-    runs {
-        register("testmodServer") {
-            server()
-            runDir = "run/testserver"
-            name = "Testmod Server"
-            source(sourceSets.getByName("testmod"))
-        }
-    }
-}

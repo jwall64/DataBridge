@@ -1,0 +1,10 @@
+{
+    "schemaVersion": 1,
+    "id": "${id}-tests",
+    "version": "${version}",
+    "entrypoints": {
+        "fabric-gametest": [
+            "dev.jwall64.databridge.test.GameTests"
+        ]
+    }
+}
