@@ -4,6 +4,9 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 
@@ -16,6 +19,20 @@ public class TestState {
     public Entity lastTrigger;
 
     public static TestState create(MinecraftServer server, @Nullable TestState previous) {
+        if(previous == null) {
+
+            PermissionCheckEvent.EVENT.register((src, permission) -> {
+                log.info("Checking permission {} for {}", permission, src);
+                if(src instanceof CommandSourceStack css 
+                    && css.getEntity() instanceof DummyPlayer dp 
+                    && dp.hasPermission(permission)) {
+
+                    return TriState.TRUE;
+                }
+                return TriState.DEFAULT;
+            });
+
+        }
         log.info("Creating new TestState");
         return new TestState();
     }
