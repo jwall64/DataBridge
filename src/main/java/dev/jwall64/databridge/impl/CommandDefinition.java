@@ -50,7 +50,7 @@ public record CommandDefinition(Type type, String value, PermissionLevel permiss
     public static final Codec<CommandDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Type.CODEC.optionalFieldOf("type", Type.ALIAS).forGetter(CommandDefinition::type),
             Codec.STRING.fieldOf("value").forGetter(CommandDefinition::value),
-            PermissionLevel.CODEC.optionalFieldOf("permission_level", PermissionLevel.ALL).forGetter(CommandDefinition::permissionLevel),
+            Utils.PERMISSION_LEVEL_OR_INT.optionalFieldOf("permission_level", PermissionLevel.ALL).forGetter(CommandDefinition::permissionLevel),
             Codec.STRING.optionalFieldOf("permission_node").forGetter(CommandDefinition::permissionNode),
             COMMAND_SELECTION_CODEC.optionalFieldOf("environment", Commands.CommandSelection.ALL)
                     .forGetter(CommandDefinition::environment),
