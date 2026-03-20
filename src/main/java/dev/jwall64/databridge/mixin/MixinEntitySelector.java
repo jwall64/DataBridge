@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.jwall64.databridge.impl.CommandSourceStackExtension;
 import dev.jwall64.databridge.impl.EntitySelectorExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mixin(EntitySelector.class)
@@ -33,7 +34,12 @@ public class MixinEntitySelector {
     @Inject(method="findEntities", at=@At("HEAD"), cancellable = true)
     private void injectFind(CommandSourceStack commandSourceStack, CallbackInfoReturnable<List<? extends Entity>> cir) {
         if(databridge$isTriggerEntity()) {
-            cir.setReturnValue(List.of(((CommandSourceStackExtension) commandSourceStack).getTriggerEntity()));
+            Entity e = ((CommandSourceStackExtension) commandSourceStack).getTriggerEntity();
+            if(e == null) { 
+                cir.setReturnValue(Collections.emptyList()); 
+            } else { 
+                cir.setReturnValue(List.of(e));
+            }
         }
     }
 
