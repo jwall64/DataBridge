@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.InteractionHand;
@@ -24,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +149,7 @@ public class MixinInteraction {
     }
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Interaction$PlayerAction;<init>(Ljava/util/UUID;J)V"))
-    private void onInteract(Player player, InteractionHand interactionHand,
+    private void onInteract(Player player, InteractionHand interactionHand, Vec3 location,
             CallbackInfoReturnable<InteractionResult> cir) {
         executeFunctions(databridge$functions, player);
     }

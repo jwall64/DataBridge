@@ -13,7 +13,7 @@ import net.minecraft.server.commands.*;
 @Mixin(FunctionCommand.class)
 public class MixinFunctionCommand {
 
-    @Redirect(method = "method_13382", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerFunctionManager;getFunctionNames()Ljava/lang/Iterable;"))
+    @Redirect(method = "lambda$static$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerFunctionManager;getFunctionNames()Ljava/lang/Iterable;"))
     private static Iterable<Identifier> redirectNames(ServerFunctionManager manager) {
 
         List<Identifier> out = new ArrayList<>();

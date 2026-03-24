@@ -2,7 +2,6 @@ package dev.jwall64.databridge.mixin;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,16 +31,4 @@ public abstract class MixinMinecraftServer {
             });
         });
     }
-
-    @Inject(method="method_29440", at=@At("TAIL"))
-    private void onReload(CallbackInfo ci) {
-
-        registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
-            state.forEach(obj -> {
-                obj.reload((MinecraftServer) (Object) this);
-            });
-        });
-
-    }
-
 }

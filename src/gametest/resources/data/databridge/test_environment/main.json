@@ -1,4 +1,5 @@
 {
-  "type": "time_of_day",
+  "type": "clock_time",
+  "clock": "minecraft:overworld",
   "time": 0
 }

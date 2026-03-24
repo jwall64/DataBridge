@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.jspecify.annotations.NonNull;
 import dev.jwall64.databridge.api.ServerFunctionUtil;
 import dev.jwall64.databridge.api.ServerStateObjects;
@@ -20,7 +17,6 @@ import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.gametest.v1.CustomTestMethodInvoker;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
@@ -30,7 +26,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
-import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -43,8 +38,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.phys.Vec3;
 
 public class GameTests implements CustomTestMethodInvoker {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameTests.class);
 
     @Override
     public void invokeTestMethod(GameTestHelper helper, @NonNull Method method) throws ReflectiveOperationException {
@@ -235,7 +228,7 @@ public class GameTests implements CustomTestMethodInvoker {
     public void interactionRunsFunctions(GameTestHelper helper, TestState state) {
         
         Pair<Interaction, Player> entities = spawnInteraction(helper, Map.of("databridge:increment", new CompoundTag()), null);
-        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND);
+        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND, entities.getFirst().position());
 
         entities.getFirst().discard();
         entities.getSecond().discard();
@@ -251,7 +244,7 @@ public class GameTests implements CustomTestMethodInvoker {
         params.putInt("amount", 30);
 
         Pair<Interaction, Player> entities = spawnInteraction(helper, Map.of("databridge:increment", params), null);
-        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND);
+        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND, entities.getFirst().position());
 
         entities.getFirst().discard();
         entities.getSecond().discard();
@@ -293,7 +286,7 @@ public class GameTests implements CustomTestMethodInvoker {
     public void interactionSetsTriggerEntity(GameTestHelper helper, TestState state) {
 
         Pair<Interaction, Player> entities = spawnInteraction(helper, Map.of("databridge:trigger", new CompoundTag()), null);
-        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND);
+        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND, entities.getFirst().position());
 
         entities.getFirst().discard();
         entities.getSecond().discard();
@@ -324,7 +317,7 @@ public class GameTests implements CustomTestMethodInvoker {
         params.putInt("value", 30);
 
         Pair<Interaction, Player> entities = spawnInteraction(helper, Map.of("databridge:trigger", params), null);
-        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND);
+        entities.getFirst().interact(entities.getSecond(), InteractionHand.MAIN_HAND, entities.getFirst().position());
 
         entities.getFirst().discard();
         entities.getSecond().discard();

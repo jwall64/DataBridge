@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.resources.RegistryValidator;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -28,18 +29,10 @@ public class MixinDataLoader {
     @WrapOperation(method="<clinit>", at=@At(value="FIELD", opcode=Opcodes.PUTSTATIC, target="Lnet/minecraft/resources/RegistryDataLoader;WORLDGEN_REGISTRIES:Ljava/util/List;"))
     private static void redirectWorldgenRegistries(List<RegistryDataLoader.RegistryData<?>> value, Operation<Void> original) {
         original.call(Stream.concat(value.stream(), Stream.of(
-                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.STATE_OBJECT, StateObject.CODEC, false),
-                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.COMMAND, CommandDefinition.CODEC, false),
-                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.FUNCTION, JavaFunctionDefinition.CODEC, false)
+                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.STATE_OBJECT, StateObject.CODEC, RegistryValidator.none()),
+                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.COMMAND, CommandDefinition.CODEC, RegistryValidator.none()),
+                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.FUNCTION, JavaFunctionDefinition.CODEC, RegistryValidator.none())
         )).toList());
     }
-
-    @WrapOperation(method="loadContentsFromManager", at=@At(value="INVOKE", target="Lnet/minecraft/tags/TagLoader;loadTagsForRegistry(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/WritableRegistry;)V"))
-    private static <T> void onLoadTags(ResourceManager resourceManager, WritableRegistry<T> writableRegistry, Operation<Void> original) {
-        if(!(writableRegistry.key().equals(DataBridgeRegistries.FUNCTION))) {
-            original.call(resourceManager, writableRegistry);
-        }
-    }
-
 
 }

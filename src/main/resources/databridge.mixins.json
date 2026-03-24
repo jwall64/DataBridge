@@ -15,7 +15,8 @@
         "MixinServerFunctionLibrary",
         "MixinServerResources",
         "MixinTagLoader",
-        "MixinFunctionCommand"
+        "MixinFunctionCommand",
+        "MixinRegistryLoadTask"
     ],
     "client": [],
     "server": [],

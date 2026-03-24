@@ -10,8 +10,8 @@ Utils.setupResources(project, rootProject, "fabric.mod.json")
 dependencies {
 
     minecraft("com.mojang:minecraft:${project.properties["minecraft-version"]}")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric-loader-version"]}")
+    //mappings(loom.officialMojangMappings())
+    implementation("net.fabricmc:fabric-loader:${project.properties["fabric-loader-version"]}")
 
     // Fabric API
     val apiModules = listOf(
@@ -19,10 +19,10 @@ dependencies {
         "fabric-resource-loader-v0"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
+        api(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
     }
 
-    include(modApi("me.lucko:fabric-permissions-api:0.6.1") {
+    include(api("dev.jwall64.me.lucko:fabric-permissions-api:0.7.0-SNAPSHOT") {
         isTransitive = false
     })
 
@@ -32,7 +32,7 @@ dependencies {
         "fabric-registry-sync-v0"
     )
     for(mod in testApiModules) {
-        modGametestImplementation(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))
+        gametestImplementation(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))
     }
 }
 

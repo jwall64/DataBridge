@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import dev.jwall64.databridge.api.ServerFunctionUtil;
+import dev.jwall64.databridge.impl.DataBridgeRegistries;
 import dev.jwall64.databridge.impl.DatabridgeFunctionTags;
 
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +51,15 @@ public class MixinPlayerList {
         data.putString("uuid", serverPlayer.getUUID().toString());
         ServerFunctionUtil.executeFunctionTag(server, DatabridgeFunctionTags.LEAVE, data,
                 source -> source.withEntity(serverPlayer));
+    }
+
+    @Inject(method = "reloadResources", at = @At(value = "HEAD"))
+    private void onReload(CallbackInfo ci) {
+        server.registryAccess().lookup(DataBridgeRegistries.STATE_OBJECT).ifPresent(state -> {
+            state.forEach(obj -> {
+                obj.reload(server);
+            });
+        });
     }
 
 }
