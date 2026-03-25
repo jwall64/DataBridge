@@ -10,7 +10,6 @@ Utils.setupResources(project, rootProject, "fabric.mod.json")
 dependencies {
 
     minecraft("com.mojang:minecraft:${project.properties["minecraft-version"]}")
-    //mappings(loom.officialMojangMappings())
     implementation("net.fabricmc:fabric-loader:${project.properties["fabric-loader-version"]}")
 
     // Fabric API
@@ -22,7 +21,7 @@ dependencies {
         api(include(fabricApi.module(mod, "${project.properties["fabric-api-version"]}"))!!)
     }
 
-    include(api("dev.jwall64.me.lucko:fabric-permissions-api:0.7.0-SNAPSHOT") {
+    include(api("me.lucko:fabric-permissions-api:0.7.0") {
         isTransitive = false
     })
 
