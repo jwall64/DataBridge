@@ -42,17 +42,16 @@ to Java code. Commands are registered in the `command` folder in data packs. Com
   "name": "mycommand",
   "type": "",
   "value": "",
-  "permission_level": 0,
+  "permission_level": "all",
   "permission_node": null,
   "state_object": null
 }
 ```
 The `name` field is the name of the command.<br/>
-The `type` field can be `alias`, `method`, or `builder`.
-The `permission_level` field is optional, and defaults to 0. This is the operator level a player needs to run the command.<br/>
-The `permission_node` field is optional. If specified, players will need that permission node (or the specified permission level)
+The `type` field can be `alias`, `method`, or `builder`.<br/>
+The `permission_level` field is optional, and defaults to "all". This is the [permission level](https://minecraft.wiki/w/Permission_level) a player needs to run the command.<br/>
+The `permission_node` field is optional. If specified, players will need that permission node (or the above permission level) to execute the command. (A permission management system such as [LuckPerms](https://luckperms.net/) is required to give players permission nodes.)<br/>
 The `state_object` field is optional. If present, it is the name of a state object. (See below)<br/>
-to execute the command.<br/>
 
 If the type is `alias`, `value` should be a command string to be executed when the command is run. Command aliases will 
 be executed with the server's function permission level.
