@@ -62,8 +62,13 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<ShadowJar>("shadowJar") {
-    enabled = true
-    archiveBaseName.set(archiveName)
-    archiveClassifier.set("partial")
-}
 
+    val jar = tasks.named<Jar>("jar").get()
+    dependsOn(jar)
+    from(zipTree(jar.archiveFile))
+
+    archiveClassifier.set("")
+    archiveBaseName.set(archiveName)
+
+    configurations = listOf(project.configurations["shadow"])
+}
