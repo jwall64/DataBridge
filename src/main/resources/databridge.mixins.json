@@ -13,6 +13,7 @@
         "MixinMinecraftServer",
         "MixinPlayerList",
         "MixinServerFunctionLibrary",
+        "MixinServerGamePacketListener",
         "MixinServerResources",
         "MixinTagLoader",
         "MixinFunctionCommand",

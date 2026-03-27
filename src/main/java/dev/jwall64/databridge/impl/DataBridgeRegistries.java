@@ -11,5 +11,6 @@ public class DataBridgeRegistries {
     public static final ResourceKey<Registry<StateObject<?>>> STATE_OBJECT = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("state_object"));
     public static final ResourceKey<Registry<CommandDefinition>> COMMAND = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("command"));
     public static final ResourceKey<Registry<JavaFunctionDefinition>> FUNCTION = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("function"));
+    public static final ResourceKey<Registry<CustomClickEventHandler>> CLICK_EVENT_HANDLER = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("click_event_handler"));
 
 }

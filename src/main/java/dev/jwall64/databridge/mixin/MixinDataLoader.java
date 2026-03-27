@@ -2,10 +2,8 @@ package dev.jwall64.databridge.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.RegistryValidator;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,6 +11,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import dev.jwall64.databridge.impl.CommandDefinition;
+import dev.jwall64.databridge.impl.CustomClickEventHandler;
 import dev.jwall64.databridge.impl.DataBridgeRegistries;
 import dev.jwall64.databridge.impl.JavaFunctionDefinition;
 import dev.jwall64.databridge.impl.StateObject;
@@ -31,7 +30,8 @@ public class MixinDataLoader {
         original.call(Stream.concat(value.stream(), Stream.of(
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.STATE_OBJECT, StateObject.CODEC, RegistryValidator.none()),
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.COMMAND, CommandDefinition.CODEC, RegistryValidator.none()),
-                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.FUNCTION, JavaFunctionDefinition.CODEC, RegistryValidator.none())
+                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.FUNCTION, JavaFunctionDefinition.CODEC, RegistryValidator.none()),
+                new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.CLICK_EVENT_HANDLER, CustomClickEventHandler.CODEC, RegistryValidator.none())
         )).toList());
     }
 
