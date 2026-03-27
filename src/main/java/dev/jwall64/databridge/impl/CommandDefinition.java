@@ -103,7 +103,7 @@ public record CommandDefinition(Type type, String value, PermissionLevel permiss
 
         if (permissionLevel != PermissionLevel.ALL) {
             if (permissionNode.isPresent()) {
-                out = out.requires(Permissions.require(permissionNode.orElseThrow(), permissionLevel.id()));
+                out = out.requires(Permissions.require(permissionNode.orElseThrow(), permissionLevel));
             } else {
                 out = out.requires(Commands.hasPermission(new PermissionCheck.Require(new Permission.HasCommandLevel(permissionLevel))));
             }
