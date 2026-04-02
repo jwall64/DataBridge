@@ -1,6 +1,7 @@
 package dev.jwall64.databridge.impl;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
@@ -26,18 +27,18 @@ public class FunctionRef {
     private static final Logger LOGGER = LoggerFactory.getLogger(FunctionRef.class);
 
     private final Identifier id;
-    private final CompoundTag with;
+    private final Optional<CompoundTag> with;
 
     private WeakReference<CommandFunction<CommandSourceStack>> function = new WeakReference<CommandFunction<CommandSourceStack>>(null);
     private InstantiatedFunction<CommandSourceStack> instance;
 
-    public FunctionRef(Identifier id, CompoundTag with) {
+    public FunctionRef(Identifier id, Optional<CompoundTag> with) {
         this.id = id;
         this.with = with;
     }
 
     public Identifier id() { return id; }
-    public CompoundTag with() { return with; }
+    public Optional<CompoundTag> with() { return with; }
 
     public void execute(MinecraftServer server, @Nullable CompoundTag tag, Function<CommandSourceStack, CommandSourceStack> sourceTransformer) {
 
@@ -50,19 +51,41 @@ public class FunctionRef {
             function = new WeakReference<>(func);
         }
 
-        if(instance == null) {
-            tag = tag == null ? with : with.copy().merge(tag);
+        InstantiatedFunction<CommandSourceStack> inst = instance;
+        if(tag != null) {
+
+            CompoundTag realWith = null;
+            if(with.isEmpty()) {
+                realWith = tag;
+            } else {
+                realWith = with.get().copy().merge(tag);
+            }
+        
             try {
-                instance = func.instantiate(tag, server.getCommands().getDispatcher());
+                inst = func.instantiate(realWith, server.getCommands().getDispatcher());
             } catch(FunctionInstantiationException ex) {
                 LOGGER.error("An error occurred while instantiating a function!", ex);
                 return;
             }
+
+        } else if(inst == null) {
+
+            try {
+                inst = func.instantiate(with.orElse(null), server.getCommands().getDispatcher());
+            } catch(FunctionInstantiationException ex) {
+                LOGGER.error("An error occurred while instantiating a function!", ex);
+                return;
+            }
+
+            // Cache tag-less instance
+            instance = inst;
         }
 
         CommandSourceStack css = sourceTransformer.apply(server.getFunctions().getGameLoopSender());
+
+        final InstantiatedFunction<CommandSourceStack> finalInst = inst;
         Commands.executeCommandInContext(css, exeCtx -> {
-            ExecutionContext.queueInitialFunctionCall(exeCtx, instance, css, CommandResultCallback.EMPTY);
+            ExecutionContext.queueInitialFunctionCall(exeCtx, finalInst, css, CommandResultCallback.EMPTY);
         });
 
     }
@@ -70,9 +93,9 @@ public class FunctionRef {
     public static final Codec<FunctionRef> CODEC = Codec.withAlternative(
         RecordCodecBuilder.create(instance -> instance.group(
             Identifier.CODEC.fieldOf("id").forGetter(FunctionRef::id),
-            CompoundTag.CODEC.fieldOf("with").forGetter(FunctionRef::with)
+            CompoundTag.CODEC.optionalFieldOf("with").forGetter(FunctionRef::with)
         ).apply(instance, FunctionRef::new)), 
-        Codec.STRING.xmap(str -> new FunctionRef(Identifier.tryParse(str), new CompoundTag()), ref -> ref.id().toString())
+        Codec.STRING.xmap(str -> new FunctionRef(Identifier.tryParse(str), Optional.empty()), ref -> ref.id().toString())
     );
 
 }

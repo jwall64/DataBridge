@@ -7,11 +7,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.jwall64.databridge.impl.FunctionalComponent;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -20,32 +24,49 @@ import net.minecraft.world.level.block.state.BlockState;
 @Mixin(ItemStack.class)
 public class MixinItemStack {
 
-    @Inject(method="use", at=@At(value="INVOKE", target="Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private void onUse(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> res) {
+    @WrapOperation(method="use", at=@At(value="INVOKE", target="Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult wrapUse(Item item, Level level, Player player, InteractionHand hand, Operation<InteractionResult> orig) {
+
+        InteractionResult result = orig.call(item, level, player, hand);
+        if(result.consumesAction()) {
+            return result;
+        }
+
         ItemStack is = (ItemStack) (Object) this;
         FunctionalComponent cmp = FunctionalComponent.get(is);
-
-        if(cmp == null) return;
-        cmp.executeInteract(player, hand);
-    }
-
-    @Inject(method="useOn", at=@At(value="INVOKE", target="Lnet/minecraft/world/item/Item;useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"))
-    private void onUseBlock(UseOnContext ctx, CallbackInfoReturnable<InteractionResult> res) {
-        ItemStack is = (ItemStack) (Object) this;
-        FunctionalComponent cmp = FunctionalComponent.get(is);
-
-        if(cmp == null) return;
-        cmp.executeInteractBlock(ctx.getPlayer(), ctx.getHand(), ctx.getClickedPos());
-    }
-
-    @Inject(method="interactLivingEntity", at=@At(value="HEAD"))
-    private void onInteractEntity(Player player, LivingEntity target, InteractionHand hand, CallbackInfoReturnable<InteractionResult> res) {
+        if(cmp == null) return InteractionResult.PASS;
         
+        return cmp.executeInteract(player, hand);
+    }
+
+    @WrapOperation(method="useOn", at=@At(value="INVOKE", target="Lnet/minecraft/world/item/Item;useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult wrapUseBlock(Item item, UseOnContext ctx, Operation<InteractionResult> orig) {
+
+        InteractionResult result = orig.call(item, ctx);
+        if(result.consumesAction()) {
+            return result;
+        }
+
         ItemStack is = (ItemStack) (Object) this;
         FunctionalComponent cmp = FunctionalComponent.get(is);
 
-        if(cmp == null) return;
-        cmp.executeInteractEntity(player, hand, target);
+        if(cmp == null) return InteractionResult.PASS;
+
+        return cmp.executeInteractBlock(ctx.getPlayer(), ctx.getHand(), ctx.getClickedPos());
+    }
+
+    @WrapOperation(method="interactLivingEntity", at=@At(value="INVOKE", target="Lnet/minecraft/world/item/Item;interactLivingEntity(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult onInteractEntity(Item item, ItemStack self, Player player, LivingEntity target, InteractionHand hand, Operation<InteractionResult> orig) {
+
+        InteractionResult res = orig.call(item, self, player, target, hand);
+        if(res.consumesAction()) {
+            return res;
+        }
+
+        FunctionalComponent cmp = FunctionalComponent.get(self);
+        if(cmp == null) return InteractionResult.PASS;
+
+        return cmp.executeInteractEntity(player, hand, target);
     }
 
     @Inject(method="hurtEnemy", at=@At(value="HEAD"))

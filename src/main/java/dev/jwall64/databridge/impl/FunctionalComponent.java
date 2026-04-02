@@ -13,9 +13,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.phys.Vec3;
 
 public record FunctionalComponent(Map<Action, List<FunctionRef>> functions) {
 
@@ -49,45 +51,51 @@ public record FunctionalComponent(Map<Action, List<FunctionRef>> functions) {
         public static Codec<Action> CODEC = Codec.STRING.xmap(Action::byId, Action::id);
     }
 
-    private void executeFunctions(Action action, Entity player, Entity target, InteractionHand hand, CompoundTag with) {
+    private boolean executeFunctions(Action action, Entity player, Entity target, InteractionHand hand, Vec3 pos) {
         List<FunctionRef> list = functions.get(action);
 
+        CompoundTag with = null;
         if(hand != null) {
-            if(with == null) with = new CompoundTag();
+            with = new CompoundTag();
             with.putInt("hand_index", hand.ordinal());
             with.putString("hand_slot", hand.asEquipmentSlot().getSerializedName());
         }
 
-        if(list != null) for(FunctionRef ref : list) { 
-            ref.execute(
-                player.level().getServer(), 
-                with, 
-                css -> {
-                    css = css.withEntity(player);
-                    if(target != null) ServerFunctionUtil.setTriggerEntity(css, target);
-                    return css;
-                }
-            );
+        if(list != null) {
+            for(FunctionRef ref : list) { 
+                ref.execute(
+                    player.level().getServer(), 
+                    with, 
+                    css -> {
+                        css = css.withEntity(player);
+                        if(pos != null) css = css.withPosition(pos);
+                        if(target != null) ServerFunctionUtil.setTriggerEntity(css, target);
+                        return css;
+                    }
+                );
+            }
+            return true;
         }
+        return false;
     }
 
-    public void executeInteract(Entity player, InteractionHand hand) {
-        executeFunctions(Action.INTERACT, player, null, hand, null);
+    public InteractionResult executeInteract(Entity player, InteractionHand hand) {
+        return executeFunctions(Action.INTERACT, player, null, hand, null) 
+            ? InteractionResult.SUCCESS 
+            : InteractionResult.PASS;
     }
 
-    public void executeInteractBlock(Entity player, InteractionHand hand, BlockPos block) {
-        if(!functions.containsKey(Action.INTERACT_BLOCK)) return;
-
-        CompoundTag with = new CompoundTag();
-        with.putInt("block_x", block.getX());
-        with.putInt("block_y", block.getY());
-        with.putInt("block_z", block.getZ());
-        with.putString("block_coords", block.getX() + " " + block.getY() + " " + block.getZ());
-        executeFunctions(Action.INTERACT_BLOCK, player, null, hand, with);
+    public InteractionResult executeInteractBlock(Entity player, InteractionHand hand, BlockPos block) {
+        if(!functions.containsKey(Action.INTERACT_BLOCK)) return InteractionResult.PASS;
+        return executeFunctions(Action.INTERACT_BLOCK, player, null, hand, block.getCenter()) 
+            ? InteractionResult.SUCCESS 
+            : InteractionResult.PASS;
     }
 
-    public void executeInteractEntity(Entity player, InteractionHand hand, Entity entity) {
-        executeFunctions(Action.INTERACT_ENTITY, player, entity, hand, null);
+    public InteractionResult executeInteractEntity(Entity player, InteractionHand hand, Entity entity) {
+        return executeFunctions(Action.INTERACT_ENTITY, player, entity, hand, null)
+            ? InteractionResult.SUCCESS 
+            : InteractionResult.PASS;
     }
 
     public void executePiercingAttack(Entity player) {
@@ -101,12 +109,7 @@ public record FunctionalComponent(Map<Action, List<FunctionRef>> functions) {
     public void executeBreakBlock(Entity player, BlockPos block) {
         if(!functions.containsKey(Action.BREAK_BLOCK)) return;
 
-        CompoundTag with = new CompoundTag();
-        with.putInt("block_x", block.getX());
-        with.putInt("block_y", block.getY());
-        with.putInt("block_z", block.getZ());
-        with.putString("block_coords", block.getX() + " " + block.getY() + " " + block.getZ());
-        executeFunctions(Action.BREAK_BLOCK, player, null, null, with);
+        executeFunctions(Action.BREAK_BLOCK, player, null, null, block.getCenter());
     }
 
     public static @Nullable FunctionalComponent get(ItemStack is) {
