@@ -1,17 +1,14 @@
 package dev.jwall64.databridge.impl;
 
 import org.jspecify.annotations.Nullable;
-import dev.jwall64.databridge.api.ServerFunctionUtil;
 
 import com.mojang.serialization.Codec;
 
-import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
-public record CustomClickEventHandler(Identifier function) {
+public record CustomClickEventHandler(FunctionRef function) {
 
     public void handle(ServerPlayer sender, @Nullable Tag data) {
 
@@ -22,17 +19,11 @@ public record CustomClickEventHandler(Identifier function) {
             with.put("value", data);
         }
 
-        ServerFunctionUtil.executeFunction(
-            sender.level().getServer(),
-            function, 
-            with, 
-            css -> css.withEntity(sender),
-            CommandResultCallback.EMPTY
-        );
+        function.execute(sender.level().getServer(), with, css -> css.withEntity(sender));
     }
 
     public static final Codec<CustomClickEventHandler> CODEC = 
-            Identifier.CODEC
+            FunctionRef.CODEC
                 .xmap(CustomClickEventHandler::new, CustomClickEventHandler::function)
                 .fieldOf("function")
                 .codec();
