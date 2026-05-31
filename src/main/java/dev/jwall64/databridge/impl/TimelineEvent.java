@@ -19,11 +19,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 
-public class TimelineEvent {
+public class TimelineEvent implements Comparable<TimelineEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimelineEvent.class);
 
-    private final Optional<Integer> tick;
+    private final Optional<Long> tick;
     private final Identifier functionName;
     private final CompoundTag with;
 
@@ -33,17 +33,21 @@ public class TimelineEvent {
     private boolean instantiated = false;
     private InstantiatedFunction<CommandSourceStack> instance;
 
-    public TimelineEvent(Optional<Integer> tick, Identifier functionName, CompoundTag with) {
+    public TimelineEvent(Optional<Long> tick, Identifier functionName, CompoundTag with) {
         this.tick = tick;
         this.functionName = functionName;
         this.with = with;
     }
 
-    public Optional<Integer> tick() { return tick; }
+    public Optional<Long> tick() { return tick; }
     public Identifier function() { return functionName; }
     public CompoundTag with() { return with; }
 
-    public void execute(MinecraftServer server, int tick) {
+    public int compareTo(TimelineEvent other) {
+        return Long.compare(this.tick.orElse(Long.MAX_VALUE), other.tick.orElse(Long.MAX_VALUE));
+    }
+
+    public void execute(MinecraftServer server, long tick) {
         
         if(this.tick.isPresent() && this.tick.get() != tick) {
             return;
@@ -56,7 +60,7 @@ public class TimelineEvent {
         if(function == null) return;
 
         if(!instantiated) {
-            with.putInt("tick", tick);
+            with.putLong("tick", tick);
             try {
                 instance = function.instantiate(with, server.getCommands().getDispatcher());
             } catch(FunctionInstantiationException ex) {
@@ -76,7 +80,7 @@ public class TimelineEvent {
     }
 
     public static final Codec<TimelineEvent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.INT.optionalFieldOf("tick").forGetter(TimelineEvent::tick),
+        Codec.LONG.optionalFieldOf("tick").forGetter(TimelineEvent::tick),
         Identifier.CODEC.fieldOf("function").forGetter(TimelineEvent::function),
         CompoundTag.CODEC.fieldOf("with").forGetter(TimelineEvent::with)
     ).apply(instance, TimelineEvent::new));

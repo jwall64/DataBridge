@@ -20,7 +20,9 @@
         "MixinRegistryLoadTask",
         "MixinCustomData",
         "MixinItemStack",
-        "MixinPiercingWeapon"
+        "MixinPiercingWeapon",
+        "MixinServerClockManager",
+        "MixinTimeline"
     ],
     "client": [],
     "server": [],

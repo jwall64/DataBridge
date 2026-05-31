@@ -1,0 +1,13 @@
+{
+    "period_ticks": 100,
+    "clock": "minecraft:overworld",
+    "tracks": {},
+    "time_markers": {},
+    "events": [
+        {
+            "tick": 0,
+            "function": "databridge:broadcast_event",
+            "with": {}
+        }
+    ]
+}
