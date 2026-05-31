@@ -117,6 +117,20 @@ RegistryAccess access = [ ... ];
 Optional<S> obj = ServerStateObjects.getStateObject(access, S.class, "namespace:path");
 ```
 
+### Extra Function Tags
+DataBridge adds a few extra function tags for data packs to use:
+- `databridge:join`: Functions with this tag are called when a player joins the server, right before the join message is sent. The command source for these functions is the player who is joining.
+- `databridge:joined`: Functions with this tag are called when a player has fully joined the server, after the join message is sent. The command source for these functions is the player who joined.
+- `databridge:leave`: Functions with this tag are called when a player leaves the server, before the leave message is sent and before the player data is saved. The command source for these functions is the player who left.
+
+For all three of these functions, the player's username and uuid are passed to the function in the `with` parameter in the following format:
+```json
+{ 
+    "username": "playername", 
+    "uuid": "playeruuid" 
+}
+```
+
 ### Interaction Entities
 Interaction entities can now directly execute functions, rather than just storing the last player who interacted with them.
 To facilitate this, the mod adds two new NBT fields for interaction entities:
@@ -152,4 +166,85 @@ Entity trigger = triggerSelector.findSingleEntity(cs);
 Using the DataBridge API:
 ```java
 Entity trigger = ServerFunctionUtil.getTriggerEntity(cs);
+```
+
+### Custom Click Event Handlers
+Data packs can also define handlers for click events with the [`custom`](https://minecraft.wiki/w/Text_component_format#custom) action type (introduced in Minecraft 1.21.6). 
+To do this, create a json file in the `click_event_handler` folder with the following format:
+```json
+{
+  "function": "namespace:function_name"
+}
+```
+The `function` field should be a reference to a registered function in the form `namespace:function_name`. The function will receive the `payload` field of the click event as its `with` parameter. The command source will be the player who clicked. 
+
+For example, if the click event is defined as follows:
+```json
+{
+  "action": "custom",
+  "id": "mypack:my_handler",
+  "payload": {"message": "Hello, world!"}
+}
+```
+And the click event handler function is defined as follows:
+```json
+{
+    "function": "mypack:handle_click"
+}
+```
+Then when a player clicks the text with that click event, the `handle_click` function will be executed with the command source of the player and a `with` parameter of `{"message": "Hello, world!"}`.
+
+### Functional Item Components
+With DataBridge installed, item stacks can be configured to execute functions when used. To do this, add the following NBT data to the item's `minecraft:custom_data` component:
+```nbtt
+{
+    "databridge:functional": {
+        "<action>": [ 
+            { 
+                "id": "namespace:function_name", 
+                "with": { "param": "value"} 
+            }
+        ]
+    }
+}
+```
+where `<action>` is the item use action that triggers the function. Possible values for `<action>` are:
+- `attack`: Triggered when the item is used to attack an entity.
+- `piercing_attack`: Triggered when the item is used to perform a piercing attack, regardless of whether an entity is actually hit. (This can be used for left-click detection, but it requires the item to have the `minecraft:piercing_weapon` component.)
+- `interact`: Triggered whenever the item is right-clicked, regardless of what it is clicked on.
+- `interact_block`: Triggered when the item is right-clicked on a block.
+- `interact_entity`: Triggered when the item is right-clicked on an entity.
+- `break_block`: Triggered when the item is used to break a block.
+
+When the item is used with the specified action, the corresponding functions will be executed with the user as the command source and the specified `with` parameter.
+
+### Timeline Events
+With DataBridge, data packs can also register functions to be executed at specific points on a vanilla [timeline](https://minecraft.wiki/w/Timeline) (introduced in 1.21.11.) This is done through a new field in the timeline JSON format. To add a timeline event, add the following field to a timeline JSON file: 
+```json
+{
+    "events": [
+        {
+            "tick": 0,
+            "function": "namespace:function_name",
+            "with": {"param": "value"}
+        }
+    ]
+}
+```
+
+A minimal timeline JSON file that executes a function every 100 ticks (5 seconds) might look something like this:
+```json
+{
+    "period_ticks": 100,
+    "clock": "minecraft:overworld",
+    "tracks": {},
+    "time_markers": {},
+    "events": [
+        {
+            "tick": 0,
+            "function": "namespace:function_name",
+            "with": {}
+        }
+    ]
+}
 ```
