@@ -30,6 +30,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -191,7 +192,7 @@ public class GameTests implements CustomTestMethodInvoker {
         ServerLevel level = helper.getLevel();
         Vec3 origin = helper.absoluteVec(Vec3.ZERO);
 
-        Interaction entity = new Interaction(EntityType.INTERACTION, level);
+        Interaction entity = new Interaction(EntityTypes.INTERACTION, level);
         TagValueOutput vo = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         entity.saveWithoutId(vo);
         CompoundTag tag = vo.buildResult();
@@ -358,7 +359,7 @@ public class GameTests implements CustomTestMethodInvoker {
 
         try {
             EntitySelector sel = parser.parse();
-            Interaction test = new Interaction(EntityType.INTERACTION, helper.getLevel());
+            Interaction test = new Interaction(EntityTypes.INTERACTION, helper.getLevel());
 
             CommandSourceStack css = helper.getLevel().getServer().createCommandSourceStack();
             ServerFunctionUtil.setTriggerEntity(css, test);

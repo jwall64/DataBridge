@@ -87,7 +87,7 @@ public record FunctionalComponent(Map<Action, List<FunctionRef>> functions) {
 
     public InteractionResult executeInteractBlock(Entity player, InteractionHand hand, BlockPos block) {
         if(!functions.containsKey(Action.INTERACT_BLOCK)) return InteractionResult.PASS;
-        return executeFunctions(Action.INTERACT_BLOCK, player, null, hand, block.getCenter()) 
+        return executeFunctions(Action.INTERACT_BLOCK, player, null, hand, new Vec3(block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5)) 
             ? InteractionResult.SUCCESS 
             : InteractionResult.PASS;
     }
@@ -109,7 +109,7 @@ public record FunctionalComponent(Map<Action, List<FunctionRef>> functions) {
     public void executeBreakBlock(Entity player, BlockPos block) {
         if(!functions.containsKey(Action.BREAK_BLOCK)) return;
 
-        executeFunctions(Action.BREAK_BLOCK, player, null, null, block.getCenter());
+        executeFunctions(Action.BREAK_BLOCK, player, null, null, new Vec3(block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5));
     }
 
     public static @Nullable FunctionalComponent get(ItemStack is) {
