@@ -28,7 +28,7 @@ public class MixinItemStack {
     private InteractionResult wrapUse(Item item, Level level, Player player, InteractionHand hand, Operation<InteractionResult> orig) {
 
         InteractionResult result = orig.call(item, level, player, hand);
-        if(result.consumesAction()) {
+        if(result.consumesAction() || level.isClientSide()) {
             return result;
         }
 
@@ -43,7 +43,7 @@ public class MixinItemStack {
     private InteractionResult wrapUseBlock(Item item, UseOnContext ctx, Operation<InteractionResult> orig) {
 
         InteractionResult result = orig.call(item, ctx);
-        if(result.consumesAction()) {
+        if(result.consumesAction() || ctx.getLevel().isClientSide()) {
             return result;
         }
 
@@ -59,7 +59,7 @@ public class MixinItemStack {
     private InteractionResult onInteractEntity(Item item, ItemStack self, Player player, LivingEntity target, InteractionHand hand, Operation<InteractionResult> orig) {
 
         InteractionResult res = orig.call(item, self, player, target, hand);
-        if(res.consumesAction()) {
+        if(res.consumesAction() || player.level().isClientSide()) {
             return res;
         }
 
@@ -72,6 +72,8 @@ public class MixinItemStack {
     @Inject(method="hurtEnemy", at=@At(value="HEAD"))
     private void onAttackEntity(LivingEntity hurt, LivingEntity attacker, CallbackInfoReturnable<Boolean> res) {
         
+        if(attacker.level().isClientSide()) return;
+
         ItemStack is = (ItemStack) (Object) this;
         FunctionalComponent cmp = FunctionalComponent.get(is);
 
@@ -83,6 +85,8 @@ public class MixinItemStack {
     @Inject(method="mineBlock", at=@At(value="HEAD"))
     private void onMineBlock(Level level, BlockState state, BlockPos pos, Player owner, CallbackInfo ci) {
         
+        if(level.isClientSide()) return;
+
         ItemStack is = (ItemStack) (Object) this;
         FunctionalComponent cmp = FunctionalComponent.get(is);
 
