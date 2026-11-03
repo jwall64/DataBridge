@@ -29,7 +29,6 @@ import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;

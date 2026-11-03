@@ -82,7 +82,6 @@ public class MixinInteraction {
                 self.getRotationVector(),
                 (ServerLevel) self.level(),
                 LevelBasedPermissionSet.forLevel(PermissionLevel.GAMEMASTERS),
-                self.getName().getString(), self.getName(),
                 server,
                 entity);
         ((CommandSourceStackExtension) cs).setTriggerEntity(self);

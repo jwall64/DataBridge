@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.RegistryFixedCodec;
+import net.minecraft.core.registries.codec.RegistryFixedCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.permissions.Permission;
 import net.minecraft.server.permissions.PermissionCheck;

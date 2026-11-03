@@ -8,9 +8,9 @@ import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.execution.Frame;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.codec.RegistryFixedCodec;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 

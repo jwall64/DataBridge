@@ -23,9 +23,9 @@ import java.util.stream.Stream;
 public class MixinDataLoader {
 
     @Shadow @Final @Mutable
-    public static List<RegistryDataLoader.RegistryData<?>> WORLDGEN_REGISTRIES;
+    public static List<RegistryDataLoader.RegistryData<?>> WORLD_REGISTRIES;
 
-    @WrapOperation(method="<clinit>", at=@At(value="FIELD", opcode=Opcodes.PUTSTATIC, target="Lnet/minecraft/resources/RegistryDataLoader;WORLDGEN_REGISTRIES:Ljava/util/List;"))
+    @WrapOperation(method="<clinit>", at=@At(value="FIELD", opcode=Opcodes.PUTSTATIC, target="Lnet/minecraft/resources/RegistryDataLoader;WORLD_REGISTRIES:Ljava/util/List;"))
     private static void redirectWorldgenRegistries(List<RegistryDataLoader.RegistryData<?>> value, Operation<Void> original) {
         original.call(Stream.concat(value.stream(), Stream.of(
                 new RegistryDataLoader.RegistryData<>(DataBridgeRegistries.STATE_OBJECT, StateObject.CODEC, RegistryValidator.none()),
